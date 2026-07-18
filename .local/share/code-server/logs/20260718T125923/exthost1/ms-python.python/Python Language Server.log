@@ -1,0 +1,181 @@
+2026-07-18 13:00:06.404 [info] semantic_tokens_range file:///voc/work/src/hello_llm.py 0:0-33:0
+2026-07-18 13:00:06.424 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-18 13:00:06.502 [info] [Debug - 1:00:06 PM] no definitions found for name "str" of type 'statement' (18:18)
+2026-07-18 13:00:06.502 [info] [Debug - 1:00:06 PM] no definitions found for name "str" of type 'statement' (18:26)
+2026-07-18 13:00:07.480 [info] ERROR:pygls.protocol.json_rpc:Exception occurred for message "4": ValueError: not enough values to unpack (expected 1, got 0)
+NoneType: None
+
+2026-07-18 13:00:07.481 [info] [Error - 1:00:07 PM] Request textDocument/semanticTokens/range failed.
+2026-07-18 13:00:07.484 [info]   Message: ValueError: not enough values to unpack (expected 1, got 0)
+  Code: -32603 
+[object Object]
+2026-07-18 13:00:07.739 [info] [Debug - 1:00:07 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-18 13:00:07.740 [info] [Debug - 1:00:07 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-18 13:00:07.743 [info] [Debug - 1:00:07 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-18 13:00:07.744 [info] [Debug - 1:00:07 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-18 13:00:07.745 [info] [Debug - 1:00:07 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-18 13:00:07.748 [info] [Debug - 1:00:07 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-18 13:00:07.748 [info] [Debug - 1:00:07 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-18 13:00:07.748 [info] [Debug - 1:00:07 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-18 13:00:07.748 [info] [Debug - 1:00:07 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-18 13:17:29.782 [info] WARNING:pygls.protocol.json_rpc:Cancel notification for unknown message id "7"
+
+2026-07-18 13:23:17.528 [info] ERROR:pygls.protocol.json_rpc:Failed to handle request 8 textDocument/hover HoverParams(text_document=TextDocumentIdentifier(uri='file:///voc/work/src/hello_llm.py'), position=17:13, work_done_token=None)
+Traceback (most recent call last):
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/cache.py", line 110, in wrapper
+    return dct[key]
+KeyError: ((), frozenset())
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/pygls/protocol/json_rpc.py", line 266, in _handle_request
+    self._execute_request(msg_id, handler, params)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/pygls/protocol/json_rpc.py", line 188, in _execute_request
+    self._send_response(msg_id, handler(params))
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi_language_server/notebook_utils.py", line 373, in wrapped
+    result = f(notebook_server, notebook_params)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi_language_server/server.py", line 486, in hover
+    hover_text = jedi_utils.hover_text(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi_language_server/jedi_utils.py", line 681, in hover_text
+    header_plain = "\n".join(get_full_signatures(name))
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi_language_server/jedi_utils.py", line 626, in get_full_signatures
+    signatures = name.get_signatures()
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/api/classes.py", line 581, in get_signatures
+    for s in self._get_signatures()
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/api/classes.py", line 570, in _get_signatures
+    return [sig for name in names for sig in name.infer().get_signatures()]
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/api/classes.py", line 570, in <listcomp>
+    return [sig for name in names for sig in name.infer().get_signatures()]
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/__init__.py", line 21, in wrapper
+    return built_functions[public_name](*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/pytest.py", line 58, in wrapper
+    return func(param_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/names.py", line 528, in infer
+    values = dynamic_param_lookup(self.function_value, param.position_index)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/debug.py", line 81, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/dynamic_params.py", line 47, in wrapper
+    return func(function_value, param_index)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/dynamic_params.py", line 92, in dynamic_param_lookup
+    values = ValueSet.from_sets(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 430, in from_sets
+    for set_ in sets:
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/dynamic_params.py", line 95, in <genexpr>
+    )[param_index].infer()
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/param.py", line 28, in infer
+    return self._lazy_value.infer()
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/lazy_value.py", line 48, in infer
+    return self.context.infer_node(self.data)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/context.py", line 224, in infer_node
+    return infer_node(self, node)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 157, in infer_node
+    return _infer_node_if_inferred(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 170, in _infer_node_if_inferred
+    return _infer_node_cached(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/cache.py", line 44, in wrapper
+    rv = function(obj, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 175, in _infer_node_cached
+    return _infer_node(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/debug.py", line 81, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 83, in wrapper
+    return func(context, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 185, in _infer_node
+    return infer_atom(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 305, in infer_atom
+    return context.py__getattribute__(atom, position=position)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/context.py", line 77, in py__getattribute__
+    values = ValueSet.from_sets(name.infer() for name in names)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 430, in from_sets
+    for set_ in sets:
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/context.py", line 77, in <genexpr>
+    values = ValueSet.from_sets(name.infer() for name in names)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/names.py", line 281, in infer
+    return tree_name_to_values(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/__init__.py", line 21, in wrapper
+    return built_functions[public_name](*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/stdlib.py", line 878, in wrapper
+    return func(inference_state, context, tree_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/django.py", line 177, in wrapper
+    result = func(inference_state, context, tree_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 758, in tree_name_to_values
+    types = infer_expr_stmt(context, node, tree_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 83, in wrapper
+    return func(context, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 377, in infer_expr_stmt
+    return _infer_expr_stmt(context, stmt, seek_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/debug.py", line 81, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 410, in _infer_expr_stmt
+    value_set = context.infer_node(rhs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/context.py", line 224, in infer_node
+    return infer_node(self, node)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 157, in infer_node
+    return _infer_node_if_inferred(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 170, in _infer_node_if_inferred
+    return _infer_node_cached(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/cache.py", line 44, in wrapper
+    rv = function(obj, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 175, in _infer_node_cached
+    return _infer_node(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/debug.py", line 81, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 83, in wrapper
+    return func(context, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 255, in _infer_node
+    return infer_or_test(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 461, in infer_or_test
+    types = context.infer_node(next(iterator))
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/context.py", line 224, in infer_node
+    return infer_node(self, node)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 157, in infer_node
+    return _infer_node_if_inferred(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 170, in _infer_node_if_inferred
+    return _infer_node_cached(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/cache.py", line 44, in wrapper
+    rv = function(obj, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 175, in _infer_node_cached
+    return _infer_node(context, element)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/debug.py", line 81, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 83, in wrapper
+    return func(context, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 209, in _infer_node
+    value_set = infer_trailer(context, value_set, trailer)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 272, in infer_trailer
+    return atom_values.py__getattribute__(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 496, in py__getattribute__
+    return ValueSet.from_sets(c.py__getattribute__(*args, **kwargs) for c in self._set)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 430, in from_sets
+    for set_ in sets:
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 496, in <genexpr>
+    return ValueSet.from_sets(c.py__getattribute__(*args, **kwargs) for c in self._set)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 83, in py__getattribute__
+    names = self.goto(name_or_str, name_context, analysis_errors)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 72, in goto
+    names = finder.filter_name(filters, name_or_str)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/finder.py", line 35, in filter_name
+    for filter in filters:
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 62, in _get_value_filters
+    yield from self.get_filters(origin_scope=origin_scope)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 336, in __getattr__
+    return getattr(self._wrapped_value, name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/compiled/__init__.py", line 34, in __getattribute__
+    return super().__getattribute__(name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/utils.py", line 67, in wrapper
+    return func(*args, **kwds)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/cache.py", line 112, in wrapper
+    result = method(self, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 344, in _wrapped_value
+    return self._get_wrapped_value()
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/compiled/__init__.py", line 37, in _get_wrapped_value
+    instance, = builtin_from_name(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/compiled/__init__.py", line 16, in builtin_from_name
+    name, = filter_.get(string)
+ValueError: not enough values to unpack (expected 1, got 0)
+
+2026-07-18 13:23:17.531 [info] [Error - 1:23:17 PM] Request textDocument/hover failed.
+2026-07-18 13:23:17.536 [info]   Message: ValueError: not enough values to unpack (expected 1, got 0)
+  Code: -32603 
+[object Object]

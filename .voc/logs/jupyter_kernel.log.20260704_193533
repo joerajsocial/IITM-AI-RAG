@@ -1,0 +1,3 @@
+[KernelGatewayApp] Jupyter Kernel Gateway at http://0.0.0.0:8083
+[I 260704 15:35:58 web:2239] 200 GET /r2162ac2e526aea38c214037a5465703u3972901__jupyter__jupyter_kernel__end__/api (172.16.2.129) 0.73ms
+[I 260704 15:39:06 web:2239] 200 GET /r2162ac2e526aea38c214037a5465703u3972901__jupyter__jupyter_kernel__end__/api (172.16.2.129) 0.54ms
