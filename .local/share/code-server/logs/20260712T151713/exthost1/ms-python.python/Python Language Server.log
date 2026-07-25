@@ -1,0 +1,202 @@
+2026-07-12 15:20:39.160 [info] semantic_tokens_range file:///voc/work/hello_llm.py 0:0-0:0
+2026-07-12 15:20:39.179 [info] semantic_tokens_full file:///voc/work/hello_llm.py 
+2026-07-12 15:20:51.573 [info] semantic_tokens_full file:///voc/work/hello_llm.py 
+2026-07-12 15:20:51.650 [info] semantic_tokens_range file:///voc/work/hello_llm.py 0:0-20:17
+2026-07-12 15:20:53.523 [info] [Debug - 3:20:53 PM] no definitions found for name "completions" of type 'statement' (10:23)
+2026-07-12 15:20:53.523 [info] [Debug - 3:20:53 PM] no definitions found for name "create" of type 'statement' (10:35)
+2026-07-12 15:20:53.527 [info] [Debug - 3:20:53 PM] no definitions found for name "model" of type 'statement' (11:8)
+2026-07-12 15:20:53.527 [info] [Debug - 3:20:53 PM] no definitions found for name "messages" of type 'statement' (12:8)
+2026-07-12 15:20:53.528 [info] [Debug - 3:20:53 PM] no definitions found for name "choices" of type 'statement' (17:16)
+2026-07-12 15:20:53.528 [info] [Debug - 3:20:53 PM] no definitions found for name "message" of type 'statement' (17:27)
+2026-07-12 15:20:53.532 [info] [Debug - 3:20:53 PM] no definitions found for name "content" of type 'statement' (17:35)
+2026-07-12 15:20:53.532 [info] [Debug - 3:20:53 PM] no matching semantic token for "__name__" of type 'statement' (19:3)
+2026-07-12 15:20:53.781 [info] [Debug - 3:20:53 PM] multiple definitions found for name "model" of type 'statement' (11:8):
+ <Name name='model', description='param model: Union[str, ChatModel]'>
+<Name name='model', description='param model: Union[str, ChatModel]'>
+<Name name='model', description='param model: Union[str, ChatModel]'>
+2026-07-12 15:20:53.782 [info] [Debug - 3:20:53 PM] multiple definitions found for name "messages" of type 'statement' (12:8):
+ <Name name='messages', description='param messages: Iterable[ChatCompletionMessageParam]'>
+<Name name='messages', description='param messages: Iterable[ChatCompletionMessageParam]'>
+<Name name='messages', description='param messages: Iterable[ChatCompletionMessageParam]'>
+2026-07-12 15:20:55.065 [info] [Debug - 3:20:55 PM] no matching semantic token for "__name__" of type 'statement' (19:3)
+2026-07-12 15:23:21.576 [info] semantic_tokens_full file:///voc/work/hello_llm.py 
+2026-07-12 15:23:21.599 [info] [Debug - 3:23:21 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:23:21.600 [info] [Debug - 3:23:21 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:23:21.604 [info] [Debug - 3:23:21 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-12 15:23:21.604 [info] [Debug - 3:23:21 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-12 15:23:21.604 [info] [Debug - 3:23:21 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-12 15:23:21.604 [info] [Debug - 3:23:21 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-12 15:23:21.609 [info] [Debug - 3:23:21 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-12 15:23:21.609 [info] [Debug - 3:23:21 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-12 15:23:21.609 [info] [Debug - 3:23:21 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-12 15:37:07.941 [info] WARNING:pygls.protocol.json_rpc:Cancel notification for unknown message id "42"
+
+2026-07-12 15:52:59.029 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:52:59.063 [info] [Debug - 3:52:59 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:52:59.064 [info] [Debug - 3:52:59 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:52:59.068 [info] [Debug - 3:52:59 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-12 15:52:59.068 [info] [Debug - 3:52:59 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-12 15:52:59.068 [info] [Debug - 3:52:59 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-12 15:52:59.068 [info] [Debug - 3:52:59 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-12 15:52:59.068 [info] [Debug - 3:52:59 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-12 15:52:59.068 [info] [Debug - 3:52:59 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-12 15:52:59.068 [info] [Debug - 3:52:59 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-12 15:52:59.486 [info] semantic_tokens_range file:///voc/work/src/hello_llm.py 0:0-33:0
+2026-07-12 15:52:59.509 [info] [Debug - 3:52:59 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:52:59.510 [info] [Debug - 3:52:59 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:52:59.515 [info] [Debug - 3:52:59 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-12 15:52:59.515 [info] [Debug - 3:52:59 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-12 15:52:59.515 [info] [Debug - 3:52:59 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-12 15:52:59.515 [info] [Debug - 3:52:59 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-12 15:52:59.515 [info] [Debug - 3:52:59 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-12 15:52:59.515 [info] [Debug - 3:52:59 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-12 15:52:59.515 [info] [Debug - 3:52:59 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-12 15:53:14.244 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:53:14.269 [info] [Debug - 3:53:14 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:53:14.269 [info] [Debug - 3:53:14 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:53:14.274 [info] [Debug - 3:53:14 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-12 15:53:14.274 [info] [Debug - 3:53:14 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-12 15:53:14.274 [info] [Debug - 3:53:14 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-12 15:53:14.274 [info] [Debug - 3:53:14 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-12 15:53:14.274 [info] [Debug - 3:53:14 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-12 15:53:14.274 [info] [Debug - 3:53:14 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-12 15:53:14.274 [info] [Debug - 3:53:14 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-12 15:53:14.984 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:53:15.009 [info] [Debug - 3:53:15 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:53:15.009 [info] [Debug - 3:53:15 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:53:15.014 [info] [Debug - 3:53:15 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-12 15:53:15.014 [info] [Debug - 3:53:15 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-12 15:53:15.014 [info] [Debug - 3:53:15 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-12 15:53:15.014 [info] [Debug - 3:53:15 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-12 15:53:15.014 [info] [Debug - 3:53:15 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-12 15:53:15.014 [info] [Debug - 3:53:15 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-12 15:53:15.014 [info] [Debug - 3:53:15 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-12 15:53:29.310 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:53:29.333 [info] [Debug - 3:53:29 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:53:29.334 [info] [Debug - 3:53:29 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:53:29.338 [info] [Debug - 3:53:29 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-12 15:53:29.338 [info] [Debug - 3:53:29 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-12 15:53:29.338 [info] [Debug - 3:53:29 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-12 15:53:29.338 [info] [Debug - 3:53:29 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-12 15:53:29.338 [info] [Debug - 3:53:29 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-12 15:53:29.338 [info] [Debug - 3:53:29 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-12 15:53:29.338 [info] [Debug - 3:53:29 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-12 15:53:30.221 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:53:30.247 [info] [Debug - 3:53:30 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:53:30.248 [info] [Debug - 3:53:30 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:53:30.252 [info] [Debug - 3:53:30 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-12 15:53:30.252 [info] [Debug - 3:53:30 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-12 15:53:30.252 [info] [Debug - 3:53:30 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-12 15:53:30.252 [info] [Debug - 3:53:30 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-12 15:53:30.252 [info] [Debug - 3:53:30 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-12 15:53:30.252 [info] [Debug - 3:53:30 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-12 15:53:30.252 [info] [Debug - 3:53:30 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-12 15:54:14.678 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:54:14.704 [info] [Debug - 3:54:14 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:54:14.705 [info] [Debug - 3:54:14 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:54:14.708 [info] [Debug - 3:54:14 PM] no definitions found for name "model" of type 'statement' (21:8)
+2026-07-12 15:54:14.708 [info] [Debug - 3:54:14 PM] no definitions found for name "messages" of type 'statement' (22:8)
+2026-07-12 15:54:14.708 [info] [Debug - 3:54:14 PM] no definitions found for name "temperature" of type 'statement' (26:8)
+2026-07-12 15:54:14.708 [info] [Debug - 3:54:14 PM] no definitions found for name "choices" of type 'statement' (28:16)
+2026-07-12 15:54:14.708 [info] [Debug - 3:54:14 PM] no definitions found for name "message" of type 'statement' (28:27)
+2026-07-12 15:54:14.708 [info] [Debug - 3:54:14 PM] no definitions found for name "content" of type 'statement' (28:35)
+2026-07-12 15:54:14.712 [info] [Debug - 3:54:14 PM] no matching semantic token for "__name__" of type 'statement' (31:3)
+2026-07-12 15:55:57.086 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:55:57.093 [info] [Debug - 3:55:57 PM] no definitions found for name "resp" of type 'statement' (20:4)
+2026-07-12 15:55:57.127 [info] [Debug - 3:55:57 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:55:57.128 [info] [Debug - 3:55:57 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:55:57.131 [info] ERROR:pygls.protocol.json_rpc:Exception occurred for message "108": ValueError: <PythonErrorNode: resp = client.chat.completions.create(         model="gpt-4o-mini",         messages=[             {"role": "system", "content": "You are concise."},             {"role": "user",   "content": question},         ],         temperature=0.9@20,4> is not in list
+NoneType: None
+
+2026-07-12 15:55:57.132 [info] [Error - 3:55:57 PM] Request textDocument/semanticTokens/full failed.
+2026-07-12 15:55:57.136 [info]   Message: ValueError: <PythonErrorNode: resp = client.chat.completions.create(         model="gpt-4o-mini",         messages=[             {"role": "system", "content": "You are concise."},             {"role": "user",   "content": question},         ],         temperature=0.9@20,4> is not in list
+  Code: -32603 
+[object Object]
+2026-07-12 15:55:57.443 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:55:57.449 [info] [Debug - 3:55:57 PM] no definitions found for name "resp" of type 'statement' (20:4)
+2026-07-12 15:55:57.474 [info] [Debug - 3:55:57 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:55:57.475 [info] [Debug - 3:55:57 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:55:57.478 [info] ERROR:pygls.protocol.json_rpc:Exception occurred for message "113": AttributeError: 'Newline' object has no attribute 'children'
+NoneType: None
+
+2026-07-12 15:55:57.478 [info] [Error - 3:55:57 PM] Request textDocument/semanticTokens/full failed.
+2026-07-12 15:55:57.478 [info]   Message: AttributeError: 'Newline' object has no attribute 'children'
+  Code: -32603 
+[object Object]
+2026-07-12 15:55:58.087 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:55:58.098 [info] [Debug - 3:55:58 PM] no definitions found for name "resp" of type 'statement' (20:4)
+2026-07-12 15:55:58.118 [info] [Debug - 3:55:58 PM] no definitions found for name "completions" of type 'statement' (20:23)
+2026-07-12 15:55:58.119 [info] [Debug - 3:55:58 PM] no definitions found for name "create" of type 'statement' (20:35)
+2026-07-12 15:55:58.123 [info] ERROR:pygls.protocol.json_rpc:Exception occurred for message "118": AttributeError: 'Newline' object has no attribute 'children'
+NoneType: None
+
+2026-07-12 15:55:58.123 [info] [Error - 3:55:58 PM] Request textDocument/semanticTokens/full failed.
+2026-07-12 15:55:58.123 [info]   Message: AttributeError: 'Newline' object has no attribute 'children'
+  Code: -32603 
+[object Object]
+2026-07-12 15:55:58.463 [info] semantic_tokens_full file:///voc/work/src/hello_llm.py 
+2026-07-12 15:55:58.470 [info] [Debug - 3:55:58 PM] no definitions found for name "resp" of type 'statement' (20:4)
+2026-07-12 15:55:58.479 [info] ERROR:pygls.protocol.json_rpc:Failed to handle request 123 textDocument/documentSymbol DocumentSymbolParams(text_document=TextDocumentIdentifier(uri='file:///voc/work/src/hello_llm.py'), work_done_token=None, partial_result_token=None)
+Traceback (most recent call last):
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/pygls/protocol/json_rpc.py", line 266, in _handle_request
+    self._execute_request(msg_id, handler, params)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/pygls/protocol/json_rpc.py", line 188, in _execute_request
+    self._send_response(msg_id, handler(params))
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi_language_server/server.py", line 546, in document_symbol
+    document_symbols = jedi_utils.lsp_document_symbols(names)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi_language_server/jedi_utils.py", line 225, in lsp_document_symbols
+    symbol_range = _document_symbol_range(name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi_language_server/jedi_utils.py", line 204, in _document_symbol_range
+    end = name.get_definition_end_position()
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/api/classes.py", line 260, in get_definition_end_position
+    if self.type in ("function", "class"):
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/api/classes.py", line 190, in type
+    for value in self._name.infer():
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/names.py", line 281, in infer
+    return tree_name_to_values(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/__init__.py", line 21, in wrapper
+    return built_functions[public_name](*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/stdlib.py", line 878, in wrapper
+    return func(inference_state, context, tree_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/django.py", line 177, in wrapper
+    result = func(inference_state, context, tree_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/syntax_tree.py", line 771, in tree_name_to_values
+    types = imports.infer_import(context, tree_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/cache.py", line 44, in wrapper
+    rv = function(obj, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/imports.py", line 53, in infer_import
+    _prepare_infer_import(module_context, tree_name)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/imports.py", line 116, in _prepare_infer_import
+    return from_import_name, tuple(import_path), import_node.level, importer.follow()
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/imports.py", line 296, in follow
+    return import_module_by_names(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/imports.py", line 376, in import_module_by_names
+    value_set = ValueSet.from_sets([
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/imports.py", line 377, in <listcomp>
+    import_module(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/__init__.py", line 21, in wrapper
+    return built_functions[public_name](*args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/plugins/flask.py", line 20, in wrapper
+    return callback(inference_state, import_names, module_context, *args, **kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/gradual/typeshed.py", line 115, in wrapper
+    python_value_set = ValueSet.from_sets(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/base_value.py", line 430, in from_sets
+    for set_ in sets:
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/gradual/typeshed.py", line 116, in <genexpr>
+    func(inference_state, import_names, p, sys_path,)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/imports.py", line 411, in import_module
+    file_io_or_ns, is_pkg = inference_state.compiled_subprocess.get_module_info(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/compiled/subprocess/__init__.py", line 188, in wrapper
+    result = self._compiled_subprocess.run(
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/compiled/subprocess/__init__.py", line 296, in run
+    return self._send(inference_state_id, function, args, kwargs)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/inference/compiled/subprocess/__init__.py", line 318, in _send
+    is_exception, traceback, result = pickle_load(self._get_process().stdout)
+  File "/usr/local/lib/code-server-4.103.2/lib/vscode/extensions/ms-python.python-2025.12.0/python_files/lib/jedilsp/jedi/_compatibility.py", line 25, in pickle_load
+    return Unpickler(file).load()
+_pickle.UnpicklingError: invalid load key, '"'.
+
+2026-07-12 15:55:58.480 [info] [Error - 3:55:58 PM] Request textDocument/documentSymbol failed.
+2026-07-12 15:55:58.484 [info]   Message: _pickle.UnpicklingError: invalid load key, '"'.
+  Code: -32603 
+[object Object]
