@@ -123,12 +123,14 @@ async def ask(q: Question):
 async def count_requests(request: str, call_next: str):
     """An async middleware function"""
     path = request.url.path
-    if request_counts[path] ==0:
-        request_counts.get(path, 0)
-    request_counts[path] +=1
+    request_counts[path] = request_counts.get(path, 0) + 1
+    #request_counts[path] +=1
     response = await call_next(request)
     return response
 
 @app.get("/metrics")
 async def metrics():
-    return request_counts
+    return {
+        "endpoints": dict(request_counts),
+        "total": sum(request_counts.values())
+    }
