@@ -34,6 +34,8 @@ from src.pipeline.pipeline import Question as _PipelineQuestion
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)s  %(message)s")
 log = logging.getLogger(__name__)
 
+#W3 assignment -  
+request_counts: dict[str, int] = {}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Public W3 API models — locked in ADR 0002
@@ -108,3 +110,25 @@ async def ask(q: Question):
         stream_answer(q.question),
         media_type="text/plain",
     )
+
+
+#============================================
+# W3 assignment
+#============================================
+
+#------------------------------------------
+#Adding metrics & middleware
+#------------------------------------------
+@app.middleware("http")
+async def count_requests(request: str, call_next: str):
+    """An async middleware function"""
+    path = request.url.path
+    if request_counts[path] ==0:
+        request_counts.get(path, 0)
+    request_counts[path] +=1
+    response = await call_next(request)
+    return response
+
+@app.get("/metrics")
+async def metrics():
+    return request_counts
