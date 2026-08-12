@@ -76,9 +76,9 @@ async def ask_batched(q: Question) -> Answer:
     pipeline_q = _PipelineQuestion(text=q.question)
     pipeline_ans = await _pipeline_ask_llm(pipeline_q)
     return Answer(
-        content=pipeline_ans.text,
+        question = pipeline_ans.question
+        text=pipeline_ans.text,
         cost_usd=pipeline_ans.cost_usd,
-        retries=pipeline_ans.retries,
         confidence = pipeline_ans.confidence,
         sources = pipeline_ans.sources,
         prompt_tokens = pipeline_ans.prompt_tokens,
