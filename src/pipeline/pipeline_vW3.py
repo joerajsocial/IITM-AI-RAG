@@ -23,60 +23,11 @@ from pathlib import Path
 from .logging_config import get_logger
 from .settings import Settings, RunSummary
 
-#==================================================
-# W4 included to calculate cost
-#==================================================
-from .calccost import calc_cost_in_usd
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Logger — shared across the package
 # ─────────────────────────────────────────────────────────────────────────────
 log = get_logger()
-
-#==============================================================================
-# ─────────────────────────────────────────────────────────────────────────────
-# Structured-output tool schema (W4) — the shape we force the model to fill
-# ─────────────────────────────────────────────────────────────────────────────
-
-ANSWER_TOOL = {
-    "type": "function",
-    "function": {
-        "name": "answer_question",
-        "description": "Return a structured answer with content, confidence, sources, prompt_tokens, completion_tokens",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "content":    {"type": "string"},
-                "confidence": {"type": "number"},
-                "sources":    {"type": "array", "items": {"type": "string"}},
-                "prompt_tokens": {"type": "number"},
-                "completion_tokens": {"type": "number"}
-            },
-            "required": ["content", "confidence", "sources", "prompt_tokens", "completion_tokens"],
-        },
-    },
-}
-
-#==============================================================================
-
-CLARIFY_TOOL = {
-    "type": "function",
-    "function": {
-        "name": "ask_for_clarification",
-        "description": "Use when the question is too vague to answer well. Also return a structured answer with clarification, prompt_tokens, completion_tokens",
-        "parameters": {
-            "type": "object",
-            "properties": {"question_back": {"type": "string"}, 
-                            "prompt_tokens": {"type": "number"},
-                            "completion_tokens": {"type": "number"}
-                            },
-            "required": ["question_back", "prompt_tokens", "completion_tokens"],
-        },
-    },
-}
-
-#==============================================================================
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -102,10 +53,6 @@ else:
         text:     str
         cost_usd: float
         retries:  int = 0
-        confidence: float = 1.0
-        sources: list[str] = []
-        prompt_tokens: int
-        completion_tokens: int
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -126,50 +73,16 @@ async def ask_llm(q: Question, fail_rate: float = 0.0) -> Answer:
     if _settings_for_import.use_fake:
         ans = await fake_ask_llm(q, fail_rate=fail_rate)
     else:
-        #resp = await _client.chat.completions.create(
-        #    model=_settings_for_import.model,
-        #    messages=[{"role": "user", "content": q.text}],
-        #)
-        #ans = Answer(
-        #    question=q.text,
-        #    text=resp.choices[0].message.content,
-        #    cost_usd=0.0001,                  # real cost-from-usage lands in W25
-        #)
         resp = await _client.chat.completions.create(
             model=_settings_for_import.model,
-            messages=[{"role": "user", "content": q.text}],   # no "return JSON" needed
-            #tools=[ANSWER_TOOL, CLARIFY_TOOL],
-            tools=[ANSWER_TOOL],
-            tool_choice={"type": "function", "function": {"name": "answer_question"}},
-            temperature=_settings_for_import.user_temperature,     # randomness, 0.0 (deterministic-ish) .. 2.0 (wild)
-            #n=_settings_for_import.no_of_choices,                 # how many separate completions to return in `choices`
-            seed=_settings_for_import.user_seed,             # best-effort reproducibility (pair with temperature=0)
-            ##stop=["\n\n"],       # stop generating if any of these strings appears
-            ##max_tokens=50,       # HARD cap on OUTPUT tokens (see max_completion_tokens note)
-            ##top_p=1.0,           # nucleus sampling: keep tokens up to this cumulative prob
+            messages=[{"role": "user", "content": q.text}],
         )
-        #print(f"Raw structure: {resp.choices[0]}")
-        #print(f"Raw structure: {resp.choices[0].message.content}")
-        #print(f"Raw structure - tool calls: {resp.choices[0].message.tool_calls[0]}")
-        #print(f"Raw structure - Function: {resp.choices[0].message.tool_calls[0].function}")
-        #args = json.loads(resp.choices[0].message.tool_calls[0].function.arguments)
-        args = json.loads(resp.choices[0].message.tool_calls[0].function.arguments)
-
-        print("structured args:", args)
-        print("confidence (from the MODEL):", args["confidence"])
         ans = Answer(
-        question=q.text,
-        text=args["content"],
-        cost_usd=calc_cost_in_usd(_settings_for_import.model, resp.usage.prompt_tokens, resp.usage.completion_tokens),                  # Based on tiktoken should change
-        confidence = args["confidence"],
-        sources = args.get("sources", []),
-        prompt_tokens = resp.usage.prompt_tokens,
-        completion_tokens = resp.usage.completion_tokens,
+            question=q.text,
+            text=resp.choices[0].message.content,
+            cost_usd=0.0001,                  # real cost-from-usage lands in W25
         )
-
-        log.info(f"asked: {q.text[:40]}")
-        log.info(f"Answer: {ans}")
-        
+    log.info(f"asked: {q.text[:40]}")
     return ans
 
 
@@ -219,7 +132,6 @@ async def run_in_batches(
         )
         out.extend(batch_answers)
         await asyncio.sleep(0.1)              # gentle pace between batches
-        break
     return out
 
 
@@ -245,67 +157,6 @@ def summarise_run(
         fail_rate       = fail_rate,
         use_fake        = use_fake,
     )
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Real streaming (W4) — fake path simulates; real path streams delta.content
-# ─────────────────────────────────────────────────────────────────────────────
-async def stream_answer(question_text: str):
-    """Async generator yielding the answer in pieces."""
-    if _settings_for_import.use_fake:                        # FLOW: simulate from the fake answer
-        ans = await ask_llm(Question(text=question_text))
-        for word in ans.text.split(" "):
-            yield word + " "
-            await asyncio.sleep(0.05)
-        return
-    stream = await _client.chat.completions.create(
-            model=_settings_for_import.model,
-            messages=[{"role": "user", "content": question_text}],   # no "return JSON" needed
-            #tools=[ANSWER_TOOL, CLARIFY_TOOL],
-            tools=[ANSWER_TOOL],
-            tool_choice={"type": "function", "function": {"name": "answer_question"}},
-            temperature=_settings_for_import.user_temperature,     # randomness, 0.0 (deterministic-ish) .. 2.0 (wild)
-            #n=_settings_for_import.no_of_choices,                 # how many separate completions to return in `choices`
-            seed=_settings_for_import.user_seed,             # best-effort reproducibility (pair with temperature=0)
-            stream=True,  # Required for streaming chunks
-            stream_options={"include_usage": True},  # Enables usage tracking in stream
-        )
-
-    accumulated_args = ""
-    prompt_tokens = 0
-    completion_tokens = 0
-
-    async for chunk in stream:
-        if chunk.usage:        # 🟢 Captures usage on the final chunk
-            prompt_tokens       = chunk.usage.prompt_tokens
-            completion_tokens   = chunk.usage.completion_tokens
-
-        if not chunk.choices:
-            continue
-        if chunk.choices[0].delta.tool_calls:
-            arg_chunk = chunk.choices[0].delta.tool_calls[0].function.arguments
-            accumulated_args += arg_chunk
-            yield arg_chunk
-
-    log.info("Finished yields..")
-    try:
-        args = json.loads(accumulated_args)
-    except json.JSONDecodeError:
-        log.error(f"Failed to parse JSON tool arguments: {accumulated_args}")
-        args = {}
-
-    # Construct the Answer object
-    ans = Answer(
-        question=question_text,
-        text=args.get("content", ""),
-        cost_usd=calc_cost_in_usd(_settings_for_import.model, prompt_tokens, completion_tokens),
-        confidence=args.get("confidence", 0.0),
-        sources=args.get("sources", []),
-        prompt_tokens=prompt_tokens,
-        completion_tokens=completion_tokens,
-    )
-
-    log.info(f"asked: {question_text[:40]}")
-    log.info(f"Answer: {ans}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -353,5 +204,5 @@ if __name__ == "__main__":
     from .store import connect, write_run, write_answers
     with connect(settings.results_db) as con:
         run_id = write_run(con, summary)
-        n      = write_answers(con, run_id, answers, model=setting.model)
+        n      = write_answers(con, run_id, answers)
     log.info(f"persisted run {run_id} with {n} answers to {settings.results_db}")

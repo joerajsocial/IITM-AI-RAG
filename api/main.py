@@ -27,7 +27,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 # W2 pipeline — the underlying engine
-from src.pipeline.pipeline import ask_llm as _pipeline_ask_llm
+from src.pipeline.pipeline import ask_llm as _pipeline_ask_llm, stream_answer as _pipeline_stream
 from src.pipeline.pipeline import Question as _PipelineQuestion
 
 
@@ -48,10 +48,15 @@ class Question(BaseModel):
 
 
 class Answer(BaseModel):
-    """Public response shape — locked in ADR 0002."""
-    content: str
+    """Public response shape — locked in ADR 0002. Added more from Week04"""
+    question: str
+    text:     str
     cost_usd: float
-    retries: int
+    retries:  int = 0
+    confidence: float = 1.0
+    sources: list[str] = []
+    prompt_tokens: int
+    completion_tokens: int
 
 
 app = FastAPI(
@@ -74,6 +79,10 @@ async def ask_batched(q: Question) -> Answer:
         content=pipeline_ans.text,
         cost_usd=pipeline_ans.cost_usd,
         retries=pipeline_ans.retries,
+        confidence = pipeline_ans.confidence,
+        sources = pipeline_ans.sources,
+        prompt_tokens = pipeline_ans.prompt_tokens,
+        completion_tokens = pipeline_ans.completion_tokens,
     )
 
 
@@ -107,7 +116,8 @@ async def ask(q: Question):
     """Streaming /ask — the contracted endpoint."""
     log.info("ask  question=%r", q.question[:80])
     return StreamingResponse(
-        stream_answer(q.question),
+        #####stream_answer(q.question), 
+        _pipeline_stream(q.question),
         media_type="text/plain",
     )
 

@@ -169,6 +169,9 @@ def stage_04_tool_calling():
         tools=[ANSWER_TOOL],
         tool_choice={"type": "function", "function": {"name": "answer_question"}},
     )
+    print(f"Raw structure: {resp.choices[0].message.content}")
+    print(f"Raw structure - tool calls: {resp.choices[0].message.tool_calls[0]}")
+    print(f"Raw structure - Function: {resp.choices[0].message.tool_calls[0].function}")
     args = json.loads(resp.choices[0].message.tool_calls[0].function.arguments)
     print("structured args:", args)
     print("confidence (from the MODEL):", args["confidence"])
@@ -242,7 +245,7 @@ CLARIFY_TOOL = {
 
 
 def stage_06_multi_shape():
-    for user_q in ["What is RAG?", "Can you help me answering?"]:
+    for user_q in ["What is RAG?", "What is LLM?"]:
         resp = client.chat.completions.create(
             model=MODEL,
             messages=[{"role": "user", "content": user_q}],

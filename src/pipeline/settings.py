@@ -19,7 +19,15 @@ class Settings(BaseModel):
     batch_size:    int   = Field(5,   gt=0, le=20)
     fail_rate:     float = Field(0.0, ge=0.0, le=1.0)
     model:         str   = "gpt-4o-mini"
-    use_fake:      bool  = True
+    use_fake:      bool  = False
+    user_temperature: int = 1
+    no_of_choices:  int = 1
+    user_seed: int = 42
+    PRICING: dict = {
+        "gpt-4o": {"input": 2.50, "output": 10.00},
+        "gpt-4o-mini": {"input": 0.150, "output": 0.600},
+        "o1-preview": {"input": 15.00, "output": 60.00},
+    }
 
 
 class RunSummary(BaseModel):

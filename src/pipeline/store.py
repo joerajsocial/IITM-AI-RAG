@@ -34,6 +34,9 @@ CREATE TABLE IF NOT EXISTS answers (
     answer    TEXT    NOT NULL,
     cost_usd  REAL    NOT NULL,
     retries   INTEGER NOT NULL DEFAULT 0,
+    model        TEXT,                                      -- W4: which model produced it
+    confidence   REAL,                                      -- W4: structured-output field
+    sources_json TEXT,                                      -- W4: JSON-encoded sources list
     ts        REAL    NOT NULL,
     FOREIGN KEY (run_id) REFERENCES runs(id)
 );
@@ -73,11 +76,15 @@ def write_answers(
     con: sqlite3.Connection,
     run_id: int,
     answers: Iterable[Answer],
+    model: str ="",
 ) -> int:
     """Bulk-insert all answers for a given run. Returns the number of rows inserted."""
+    import json 
     ts = time.time()
     rows = [
-        (run_id, a.question, a.text, a.cost_usd, a.retries, ts)
+        (run_id, a.question, a.text, getattr(a, "confidence", None), a.retries,
+        model, getattr(a, "confidence", None),
+        json.dumps(getattr(a, "sources", [])), ts)
         for a in answers
     ]
     con.executemany(
