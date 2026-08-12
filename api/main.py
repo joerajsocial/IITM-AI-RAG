@@ -55,8 +55,8 @@ class Answer(BaseModel):
     retries:  int = 0
     confidence: float = 1.0
     sources: list[str] = []
-    prompt_tokens: int
-    completion_tokens: int
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
 
 app = FastAPI(
@@ -76,13 +76,13 @@ async def ask_batched(q: Question) -> Answer:
     pipeline_q = _PipelineQuestion(text=q.question)
     pipeline_ans = await _pipeline_ask_llm(pipeline_q)
     return Answer(
-        question = pipeline_ans.question
+        question=pipeline_ans.question,
         text=pipeline_ans.text,
         cost_usd=pipeline_ans.cost_usd,
-        confidence = pipeline_ans.confidence,
-        sources = pipeline_ans.sources,
-        prompt_tokens = pipeline_ans.prompt_tokens,
-        completion_tokens = pipeline_ans.completion_tokens,
+        confidence=pipeline_ans.confidence,
+        sources=pipeline_ans.sources,
+        prompt_tokens=pipeline_ans.prompt_tokens,
+        completion_tokens=pipeline_ans.completion_tokens,
     )
 
 
