@@ -88,8 +88,9 @@ def write_answers(
         for a in answers
     ]
     con.executemany(
-        "INSERT INTO answers (run_id, question, answer, cost_usd, retries, ts) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO answers (run_id, question, answer, cost_usd, retries, " 
+          "model, confidence, sources_json, ts) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rows,
     )
     con.commit()

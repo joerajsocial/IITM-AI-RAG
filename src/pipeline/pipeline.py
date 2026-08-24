@@ -123,6 +123,7 @@ def load_questions(path: str | Path = "data/questions.csv") -> list[Question]:
 # ─────────────────────────────────────────────────────────────────────────────
 async def ask_llm(q: Question, fail_rate: float = 0.0) -> Answer:
     """One LLM call. Branches on Settings.use_fake."""
+    #print(f"ask_llm called with question: {q}")
     if _settings_for_import.use_fake:
         ans = await fake_ask_llm(q, fail_rate=fail_rate)
     else:
@@ -148,7 +149,7 @@ async def ask_llm(q: Question, fail_rate: float = 0.0) -> Answer:
             ##max_tokens=50,       # HARD cap on OUTPUT tokens (see max_completion_tokens note)
             ##top_p=1.0,           # nucleus sampling: keep tokens up to this cumulative prob
         )
-        #print(f"Raw structure: {resp.choices[0]}")
+        print(f"Raw structure: {resp.choices[0]}")
         #print(f"Raw structure: {resp.choices[0].message.content}")
         #print(f"Raw structure - tool calls: {resp.choices[0].message.tool_calls[0]}")
         #print(f"Raw structure - Function: {resp.choices[0].message.tool_calls[0].function}")
@@ -353,5 +354,5 @@ if __name__ == "__main__":
     from .store import connect, write_run, write_answers
     with connect(settings.results_db) as con:
         run_id = write_run(con, summary)
-        n      = write_answers(con, run_id, answers, model=setting.model)
+        n      = write_answers(con, run_id, answers, model=settings.model)
     log.info(f"persisted run {run_id} with {n} answers to {settings.results_db}")
