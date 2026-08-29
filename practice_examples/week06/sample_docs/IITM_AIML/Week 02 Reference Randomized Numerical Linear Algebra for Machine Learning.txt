@@ -1,0 +1,1503 @@
+Recent and Upcoming Developments in
+Randomized Numerical Linear Algebra for Machine Learning
+Michał Derezi´nski* Michael W. Mahoney†
+June 21, 2024
+Abstract
+Large matrices arise in many machine learning and data analysis applications, including as representations of datasets,
+graphs, model weights, and first and second-order derivatives. Randomized Numerical Linear Algebra (RandNLA) is
+an area which uses randomness to develop improved algorithms for ubiquitous matrix problems. The area has reached
+a certain level of maturity; but recent hardware trends, efforts to incorporate RandNLA algorithms into core numerical
+libraries, and advances in machine learning, statistics, and random matrix theory, have lead to new theoretical and
+practical challenges. This article provides a self-contained overview of RandNLA, in light of these developments.
+1 Introduction
+Matrices provide a natural structure with which to model data. For example, a matrix A ∈ Rm×n can encode information
+about m objects, each of which is described by n features. Alternatively, a positive definite matrix A ∈ Rn×n can
+encode correlations/similarities between all pairs of n objects. Motivated by large-scale data problems, recent years
+have witnessed many exciting developments in the theory and practice of matrix algorithms. Particularly remarkable is
+the use of randomization. Historically, in statistics, machine learning (ML), and domain sciences, randomization has
+been assumed to be a property of the input data, e.g., due to noise in the data generation mechanisms. In this more
+recent work on randomization, it is used as an algorithmic or computational resource.
+Randomized Numerical Linear Algebra (RandNLA) is an interdisciplinary research area that exploits randomization
+as a computational resource to develop improved algorithms for large-scale linear algebra problems. From a foundational
+perspective, it has roots in theoretical computer science (TCS), deep connections with convex analysis, probability
+theory, and metric embedding theory, etc., as well as strong connections with scientific computing, signal processing,
+and numerical linear algebra (NLA). From an implementational perspective, well-engineered RandNLA algorithms beat
+highly-optimized software libraries for ubiquitous problems such as very over-determined least-squares, they scale well
+to parallel/distributed environments, and they beat state-of-the-art for a wide range of low-rank matrix approximation
+problems. From a data analysis perspective, RandNLA has strong connections with ML and statistics and many
+“non-methodological” applications of data analysis. More generally, of course, it is of continued importance since there
+is a growing interest in providing an algorithmic and statistical foundation for modern large-scale data analysis.
+The area of RandNLA has achieved a certain level of maturity. As such, there are multiple reviews of the area
+from multiple different perspectives: introductory overviews (light on prerequisites) [67, 68]; broad and proof-heavy
+resources [171, 167, 126]; perspectives on interdisciplinary theory (light on proofs) [124, 54]; deep investigations
+of specific disciplinary topics [94, 104, 131, 132]; and approaches to high-quality software implementations [138].
+Particularly notable is the current effort of incorporating RandNLA algorithms into the core numerical libraries (e.g.,
+RandLAPACK and RandBLAS; see [138]) that lie at the foundation of virtually all computational tools in ML (and
+scientific computing and beyond).
+This level of maturity, as well as recent demands by the ML community and recent trends in hardware, lead to
+new theoretical and practical challenges that did not exist a decade ago. For example: developing RandLAPACK and
+*University of Michigan (derezin@umich.edu)
+†ICSI, LBNL, and University of California, Berkeley (mmahoney@stat.berkeley.edu)
+1
+arXiv:2406.11151v2 [cs.LG] 19 Jun 2024
+RandBLAS leads to new algorithmic and theoretical abstractions, different than those present in TCS or NLA, and
+different than those common in statistics and ML; recent developments in neural network training highlight important
+trade-offs between communication and computation, between forward accuracy and parameter stability, etc.; and recent
+developments in hardware have led to new trade-offs between latency and throughput, both at the model training and
+model inference stage. To complement these challenges, recent theoretical developments in Random Matrix Theory
+(RMT) have provided finer quantitative performance analysis than was possible with traditional RandNLA analysis tools.
+These theoretical developments come from RMT as well as from RandNLA itself, and they permit both finer analysis
+of existing methods as well as the possibility to develop novel methods that better bridge the theory-practice gap.
+In this survey, we will provide a self-contained review/overview of RandNLA, in light of these recent developments,
+describing and highlighting upcoming and future trends. We will introduce the foundations of RandNLA and matrix
+sketching, with a particular focus on applications in ML and stochastic optimization, followed by an overview of recent
+developments in using sketching methods to gain stronger control on the convergence and generalization properties of
+stochastic algorithms. We will cover both the theoretical aspects of these techniques, as well as their applications in the
+context of important ML and data science research topics. Thus, our discussion will be relevant not only to theoretical
+researchers who wish to learn the latest advances in RandNLA, but also to a general audience of ML and data science
+researchers and practitioners, who want to incorporate RandNLA methods into their large-scale data problems.
+2 Foundations of “Classical” RandNLA
+In this section, we will describe the foundations of RandNLA theory, at least up until a few years ago. The basic idea
+is to construct a sketch (either data-aware or more commonly data-oblivious) that has parameters chosen basically
+to preserve the geometry of an entire low-dimensional subspace. This sketch can be interpreted in one of several
+complementary ways; and it can be used in one of several complementary ways. Understanding the details of these
+complementary approaches is crucial for understanding recent advances and upcoming developments in RandNLA for
+modern ML.
+2.1 Matrix Multiplication
+A core primitive in RandNLA is that of approximating the product of two matrices [66]. The basic problem is the
+following: given an m × n matrix A and an n × q matrix B, approximate the product A · B. A key conceptual insight
+is that this problem can be expressed as approximating the sum of n rank-one matrices:
+A · B =
+Xn
+k=1
+
+A∗k
+
+ ·
+􀀀
+Bk∗
+
+.
+Given this, a natural (random sampling) algorithm suggests itself:
+1: Fix a set of probabilities pi, i = 1, . . . , n, summing up to 1.
+2: for t = 1, . . . , s do
+3: Set jt = i according to P[jt = i] = pi.
+4: end for (Randomly pick s terms of the sum according to the pi’s.)
+5: Approximate AB by summing the s terms, after scaling.
+If we let S be an s × n matrix whose tth row (t = 1, ..., s) has one non-zero, St,jt = 1/
+√
+spjt , then we can use a
+“sampling matrix” formalism [66] (a type of “sketching operator”) to express this as:
+AB ≈
+1
+s
+Xs
+t=1
+1
+pjt
+ajtb⊤
+jt = (AS⊤) · (SB) = C · R,
+where ajt and b⊤
+jt are corresponding columns of A and rows of B. Now, if we use probabilities pi ∝ ∥ai∥2∥bi∥2
+2
+(row-norm sampling [66]), then we can minimize a very natural Frobenius norm error:
+E [∥AB − CR∥F ] = E[∥AB − (AS⊤)(SB)∥F ] ≤
+1
+√
+s
+∥A∥F ∥B∥F . (1)
+Here, by setting s = 1/ϵ2, we obtain a Frobenius norm error that is bounded above by ϵ, in the additive scale defined by
+∥A∥F ∥B∥F .
+This Frobenius norm bound given in (1) is used in many places in RandNLA. However, “better” spectral norm
+bounds of the form ∥AB − CR∥2 ≤ ϵ∥A∥2∥B∥2 are possible (after adjusting the sample size s; see [39]) via matrix
+versions of Chernoff/Bernstein concentration inequalities [167].
+Within RandNLA, the main “use case” for approximate matrix multiplication arises when it is applied not directly to
+the matrices themselves, but rather to the “subspaces” that they define, giving rise to subspace embeddings [124, 171].
+Definition 1 Let A be an n × d matrix, and let U consist of orthonormal columns that are the basis of the column
+subspace of A. Then, an s × n matrix S is a subspace embedding for A if
+∥U⊤U − (SU)⊤ SU∥2 = ∥I − (SU)⊤ SU∥2 ≤ ϵ.
+Here, for a sampling matrix S, the “correct” sampling probabilities pi to use are proportional to the squared row norms
+∥Ui∗∥22
+, a.k.a. the leverage scores of A. These are expensive to compute exactly, but they are fast to approximate—
+explicitly or implicitly—in one of many ways [71, 2, 37, 148, 135].
+Subspace embeddings are an extremely important concept in Classical RandNLA theory. They were introduced and
+first used implicitly in RandNLA by [72, 73], who relied on leverage score sampling [71], which can be viewed as a
+type of data-aware sketching. The first explicit definition of subspace embeddings was given by [164, 69], who focused
+on data-oblivious sketching; and these data-oblivious methods were popularized by [171]. Many constructions (random
+sampling and projection methods, deterministic constructions, hashing functions, etc.) satisfy this condition [171].
+There are several complementary interpretations of a subspace embedding. Within NLA, it is an acute perturbation
+[165], meaning in particular that distances and angles are perturbed, but rank is not lost. Within TCS, it is a Euclidean
+space analogue of Johnson-Lindenstrauss (JL) lemma [133], meaning in particular that distances are approximately
+preserved for the infinite number of points on a unit ball in the low-dimensional space. More generally, the subspace
+embedding guarantee can be used to produce a spectral approximation of the matrix product A⊤A, in terms of the
+Loewner ordering of positive semi-definite (PSD) matrices, which provides a strong control on all the associated
+eigenvectors and eigenvalues. To be more precise, let A be an m × n matrix and ϵ ∈ [0, 1/2]. If matrix S is an ϵ/2
+subspace embedding for the subspace defined by A; then A⊤S⊤SA is a spectral approximation of A⊤A, i.e.,
+1
+1 + ϵ
+A⊤A ⪯ A⊤S⊤SA ⪯ (1 + ϵ)A⊤A, (2)
+where ⪯ denotes the PSD Loewner ordering. (We use A⊤S⊤SA ≈ϵ A⊤A as a shorthand for (2) throughout.) The
+property A⊤S⊤SA ≈ϵ A⊤A implies that any ith eigenvalue of the sketch A⊤S⊤SA is an ϵ approximation of the
+corresponding eigenvalue of the data matrix A⊤A (and similarly for the singular values of SA). It also extends to the
+control of various matrix functions of A⊤A, including the inverse, i.e., (A⊤S⊤SA)−1 ≈ϵ (A⊤A)−1, square root, trace,
+quadratic form, and more.
+This subspace embedding property is a “must must have” for the worst-case style of analysis provided by TCS. For
+everyone else, it provides a guiding principle, but (strictly speaking) it’s optional. For example, if one is interested in
+providing good numerical implementations, then losing rank can still give a good preconditioner [9, 10]; and if one is
+interested in statistics and ML, then losing rank introduces a bit of bias that can be compensated for by greatly reducing
+variance [121, 153, 122]. This leads to a theory-practice gap. As we will describe in Sec. 3, this is the key technical
+place where Classical RandNLA theory and Modern RandNLA theory differ, and why recent developments in Modern
+RandNLA theory open up the door for so many other use cases and applications of RandNLA ideas.
+2.2 Least-squares Approximation
+We can use ideas from Sec. 2.1 for RandNLA methods for approximate matrix multiplication as a foundation to develop
+RandNLA methods for least-squares (LS) regression. Given m × n matrix A and m-dimensional vector b, the basic LS
+3
+problem is to solve
+x∗ = argmin
+x∈Rn
+∥Ax − b∥2.
+If m ≫ n, then the problem is called overdetermined or overconstrained; and if m ≪ n, then the problem is called
+underdetermined or underconstrained (or, especially in ML, overparameterized). In the overdetermined case, one
+can compute the solution in O(mn2) time (in RAM model), e.g., with normal equations, QR decompositions, or the
+Singular Value Decomposition (SVD). RandNLA gives faster algorithms for this ubiquitous problem, which is at the
+root of most other advances (in particular, work on low-rank matrix approximation, as well as extensions to optimization
+problems, etc.) in the area.
+Importantly, depending on the domain, “faster” can mean one of several different things: within TCS, “faster” is in
+terms of low-precision asymptotic worst-case theory; within NLA, “faster” is in terms of high-precision wall-clock time;
+and in large-scale implementations, one can compute (in Spark/MPI/etc.) low, medium, and high precision solutions on
+up to terabyte-sized data, and here “faster” depends mostly on communication.
+Meta-algorithm for LS regression. Here is a meta-algorithm for solving LS regression problems with RandNLA
+methods.
+1: Randomly sample a small number of constraints according to A’s leverage score sampling probabilities {pi}mi=1.
+2: Solve the LS regression problem on the resulting subproblem.
+A naïve version of this meta-algorithm is not promising: it gives a 1 + ϵ relative-error approximation (since it
+approximates the solution using only a subset of constraints), that fails with probability δ (comparable to flipping a fair
+coin “heads,” say, 30 times in a row), in roughly O(mn2) time, i.e., as long as the exact deterministic method (since, as
+stated, it computes the leverage scores exactly).
+On the other hand, a non-naïve version of this meta-algorithm is very promising: it gives the best worst-case
+algorithm in RAM [164, 69, 71] (using Sketch-and-Solve, described below); it beats LAPACK for high precision
+in wall-clock time [157, 9, 134] (using Sketch-and-Precondition, described below); it leads to super-terabyte-scale
+implementations in parallel/distributed environments [174, 85]; and it gives the foundation for low-rank approximations
+and the rest of RandNLA [72, 73, 124, 68].
+Fundamental structural result. For LS approximation, here is the fundamental structural result that is at the heart
+of RandNLA-based methods [69, 124]. (This is a deterministic result that holds for any matrix S, and it is central to
+RandNLA theory by choosing S to be an appropriate sketching operator.) Consider the “sketched” LS approximation
+problem:
+˜x = argmin
+x∈Rn
+∥S(Ax − b)∥2,
+where S is any matrix. If S satisfies the two basic conditions:
+1) σ2
+min(SUA) ≥ 1/
+√
+2 and 2) ∥U⊤
+AS⊤Sb⊥∥2 ≤
+p
+ϵ/2 ∥Ax∗ − b∥2,
+where b⊥ = b − UAU⊤
+AA and UA is the orthonormal basis of A, then:
+∥A˜x − b∥2 ≤ (1 + ϵ)∥Ax∗ − b∥2.
+Importantly, each of the two basic conditions can be viewed as approximate matrix-matrix multiplication [124, 68].
+RandNLA provides a plethora of sketching methods (random sampling and projection methods, deterministic
+constructions, hashing functions, etc.) for S so as to satisfy these two basic conditions. As described in the many
+reviews of RandNLA, the choice of which method one uses typically depends on one’s goals: to provide TCS-style
+worst-case theory; to provide NLA-style implementations; to use in large-scale and/or ML settings; etc.
+Three algorithmic paradigms for LS and other RandNLA methods. If we want to use RandNLA methods more
+generally, then there are three general paradigms—that apply both to LS methods as well as more broadly than LS (e.g.,
+to low-rank matrix approximation).
+1. Sketch-and-Solve: Here [164, 69, 71], we randomly construct a smaller LS problem, and then solve it using a
+traditional NLA method. This is the simplest approach to highlight the structure of RandNLA theory; it is most
+convenient for TCS-style theory; and it leads to low-precision estimates, e.g., ϵ = 0.1.
+4
+Runtime
+TCS
+ML
+NLA
+Generalization error
+Machine precision error
+Precision
+Sketch-and-Solve
+Iterative Sketching
+Sketch-and-Precondition
+Figure 1: Schematic of three algorithmic paradigms for the use of RandNLA methods: “Classical” (subspace embedding
+based) RandNLA theory is most appropriate for low precision (with Sketch-and-Solve) and high precision (with Sketchand-
+Precondition); while “Modern” (RMT-based) RandNLA theory is well-suited for moderate precision (with Iterative
+Sketching), which is of increasing interest in modern ML applications.
+2. Iterative Sketching: Here [91, 151, 175], we repeatedly sketch/sub-sample the problem randomly, and then
+iteratively refine the estimate using a convex optimization method. This includes Preconditioned Weighted SGD,
+Sketch-and-Project, and Newton Sketch; it is the most convenient for ML-style stochastic optimization; and it
+leads to moderate precision estimates, e.g., ϵ = 10−3.
+3. Sketch-and-Precondition: Here [157, 9, 134], we randomly construct an equivalent but well-conditioned problem,
+and then solve it using a traditional deterministic NLA iterative method. This is the best (usually) for high-quality
+numerical solutions; it is most convenient for NLA-style implementations; and it leads to high-precision solutions,
+e.g., ϵ = 10−10.
+See Fig. 1 for an illustration of these three algorithmic paradigms. The first and the third have received the greatest
+amount of attention within RandNLA, in part due to the (TCS and NLA based) style of theory used in Classical
+RandNLA. The new theoretical developments in Modern RandNLA (described in Sec. 3) are particularly well-suited to
+the second (and for ML based theory).
+2.3 Low-rank approximation
+We can use the ideas from Sec. 2.2 to develop RandNLA methods for low-rank (LR) approximation. Many details
+change, e.g., for LS problems the matrix is usually tall, while for LR problems both dimensions may be large, in which
+case there is a rank parameter. Here, we will highlight the main high-level ideas.
+LR matrix approximation via the SVD. Let A denote an m× n data matrix (for simplicity, suppose that m ≥ n), and
+let Q ∈ Rm×k denote an “embedding” between the “high” and “low” dimensions; then Aˆ = Q⊤A is a low-dimensional
+representation of the data, and A˜ = QQ⊤A is a LR matrix approximation. If A has rank higher than k, then the
+truncated SVD give a LR approximation,
+A ≈ Ak = UkΣkV ⊤
+k ,
+composed of the top k singular value-vector pairs, where recall that we order the singular values so that σ1 ≥ σ2 ≥
+... ≥ σn. Computing this SVD costs O(mn2) time, for m ≥ n. As for the error of the truncated SVD, we are typically
+5
+interested in how much “information” is lost in a truncated SVD, i.e., in considering
+A − Ak =
+X
+i>k
+σiuiv⊤
+i .
+For the spectral norm, this is: ∥A − Ak∥2 = σk+1; and for the Frobenius norm, this is: ∥A − Ak∥2
+F =
+P
+i>k σ2
+i . For
+any unitarily-invariant matrix norm, ∥ · ∥ξ, the matrix Ak provides an optimal rank-k approximation, in the sense that
+Ak = argminB : rank(B)=k∥A − B∥ξ.
+One can also view the truncated SVD as a projection, in which case it exhibits complementary optimality properties. In
+particular, if we let P = UkU⊤
+k be the projection onto the span of u1, ..., uk, then we can use that to derive Ak as a
+projection of A:
+PA = UkU⊤
+k A =
+Xn
+i=1
+σiUkU⊤
+k uiv⊤
+i =
+Xk
+i=1
+σiuiv⊤
+i = UkΣkV ⊤
+k = Ak.
+In this context, the total squared projection error (using P as the projection) over the columns a1, ..., an of A corresponds
+to the squared Frobenius norm error of the LR approximation:
+Xn
+i=1
+∥ai − Pai∥22
+= ∥A − Ak∥2
+F .
+These complementary perspectives have been useful in developing RandNLA LR matrix approximation methods.
+Column subset selection. There is another problem, the Column subset selection problem (CSSP), that is superficially
+different than LR matrix approximation via the SVD, but that has a similar underlying linear algebraic structure. The
+problem is to choose a small number of actual columns from an input matrix A [73, 23, 25]. For most objectives of
+interest, it is intractable to compute the optimal set of columns. One version of the CSSP is the following: instead of
+projecting onto singular vectors, one can select a subset of data points, {ai : i ∈ S} for S ⊆ {1, ..., n}, and project onto
+their span (with slight abuse of notation, here S is a subset, while later it is a sketching operator). If we let PS = QQ⊤
+be a projection onto the span of {ai : i ∈ S}, where Q is the embedding matrix, then the problem is the following:
+Find argminS:|S|=k∥A − PSA∥F .
+Even though the CSSP is different than LR matrix approximation via the SVD, and solving this problem does not in
+general require computing SVD, the truncated SVD is often used as a baseline quality measure for the CSSP.
+Fundamental Structural Result for LR Approximation. For LR matrix approximation, including both via the SVD
+and via the CSSP, here is the fundamental structural result that is at the heart of RandNLA-based methods [128]. (As
+with the fundamental structural result for LS, this is a deterministic result that holds for any matrix S, and it is central to
+RandNLA theory by choosing S to be an appropriate sketching operator.) Given A ∈ Rm×n, let Vk ∈ Rn×k be the
+matrix of the top k right singular vectors of A. Let S ∈ Rn×s (s ≥ k) be any matrix s.t. V ⊤
+k S has full rank. Then, for
+any unitarily invariant norm ξ,
+∥A − PASA∥ξ ≤ ∥A − Ak∥ξ + ∥Σk,⊥
+􀀀
+V ⊤
+k,⊥S
+
+(V ⊤
+k S)+ ∥ξ. (3)
+This result was introduced and first used for the CSSP [23]; and subsequently it has been used for improved random
+projections in LR matrix approximations [156, 94], improved Nyström-based LR PSD matrix approximations [86],
+improved feature selection methods [22, 24], and improved power iteration and Lanczos based methods [128].
+Basic randomized LR approximation algorithm. Let’s go into more detail on how this result is used for random
+projection algorithms for LR matrix approximation [94]. Given anm×n matrix A, a target rank k, and an over-sampling
+parameter p, the following algorithm outputs rank-(k + p) factors U, Σ, and V , s.t. A ≈ UΣV ⊤.
+6
+1: Draw an n × (k + p) Gaussian random matrix S.
+2: Form the n × (k + p) sample matrix Y = AS.
+3: Compute an orthonormal matrix Q s.t. Y = QQ⊤Y .
+4: Form the small matrix B = Q⊤A.
+5: Factor the small matrix B = ˆU ΣV ⊤.
+6: Form U = QˆU .
+The use of the Gaussian random matrix S is important here. It is slower in RAM than other fast sketching methods, and
+in practice generating Gaussian random bits can be the computational bottleneck. However, in scientific computing, one
+often works with structured operators which can be applied quickly to an arbitrary vector [94]. In this case, one can
+prove bounds of the form:
+∥A − QQ⊤A∥F ≤
+
+1 +
+k
+p − 1
+1/2
+∥A − Ak∥F ,
+∥A − QQ⊤A∥2 ≤
+ 
+1 +
+s
+k
+p − 1
+!
+∥A − Ak∥2 +
+e
+√
+k + p
+p
+∥A − Ak∥F .
+These expressions quantify the idea that, w.r.t. the spectral/Frobenius norm error, the computed approximation is as
+good as the best LR matrix approximation (provided by the truncated SVD), plus a very little bit of additional error.
+Extension of basic randomized LR approximation algorithm. These results can be improved in various ways, and
+the analysis typically uses some variant of the fundamental structural result in Eqn. (3). Consider, for example, the
+block power iteration scheme:
+1: Draw an n × k Gaussian random matrix S.
+2: Compute the matrix ˜Uq = orth((AA⊤)qAS) via alternating application of A, A⊤ and orthonormalization.
+The basic idea is that ˜Uq converges to the span(Uk), and ˜Uq˜U ⊤
+q A gives a good k-rank approx of A. For more detail,
+see, e.g., Lemma 4.15 from [171]. For any orthonormal matrix Q ∈ Rm×k, a basic structural result is that
+∥A − QQ⊤A∥2 ≤ ∥(AA⊤)qA − QQ⊤(AA⊤)qA∥
+1
+2q+1
+2 .
+From this, by choosing q = O(log(n)/ϵ), Q = ˜Uq, and a Gaussian S, we can show that with high probability
+∥A − ˜Uq˜U ⊤
+q A∥2 ≤ (1 + ϵ) · ∥A − Ak∥2.
+The runtime of this method is O(mnkq + nk2q), where mnkq corresponds to O(q) matrix multiplications and nk2q is
+O(q) orthonormalizations (in theory, one orthonormalization is enough, but performing orthonormalization after each
+multiplication helps numerical stability [94]). This is of interest since it leads to high precision LR approximations in
+the spectral norm [94, 171, 139, 65].
+3 Foundations of “Modern” RandNLA
+In this section, we will describe relatively-recent work that provides a foundation for current and upcoming developments
+in RandNLA. One surprising aspect of Classical RandNLA theory, as outlined in Sec. 2, is that there is actually very
+little use of randomness. Essentially, all the randomness is “filtered through” the subspace embedding. That is sufficient
+for many TCS and NLA style objectives (although with Sketch-and-Solve and Sketch-and-Precondition, the two areas
+use that embedding differently), but it is often “overkill” when RandNLA methods are used in broader (statistical, ML,
+optimization) pipelines (that typically use some form of Iterative Sketching). This has applications, in particular, in
+stochastic optimization and traditional statistical resampling methods, where the JL-style guarantees that come with a
+subspace embedding are sufficient but not necessary. Modern RandNLA theory basically asks for a stronger form of
+“Algorithmic Gaussianization” than the JL Lemma provides, in the sense that sketches look more Gaussian-like than
+what is provided with pair-wise JL-like guarantees. To accomplish this, we must make connections with ideas from
+non-asymptotic RMT, which have proven fruitful across data science and ML.
+7
+3.1 Algorithmic Gaussianization via RMT and LESS Embeddings
+To understand the basic issue, let us revisit the subspace embedding, where for an n × d orthogonal matrix U (a column
+basis matrix of A) we seek a matrix S ∈ Rs×n such that (SU)⊤SU ≈ϵ U⊤U = I. Here, s must be larger than d; but
+how much larger does it need to be?
+The proportional regime. Let us consider the extreme case (which is in fact the most common) where s ≈ d to within
+a constant factor, and suppose that S is a scaled i.i.d. Gaussian sketching matrix. Thanks to the rotation invariance of
+Gaussian distribution, SU is also Gaussian, and so we can obtain (up to lower order terms):
+σmin(SU) ≈ 1 −
+r
+d
+s
+, σmax(SU) ≈ 1 +
+r
+d
+s
+. (4)
+This follows from the Marchenko-Pastur (MP) law [12]. Such a Gaussian sketch not only gives us sharp control on
+subspace embeddings, but also on most Classical RandNLA tasks, e.g.:
+• Sketch-and-Solve: If we solve ˜x = argminx∥S(Ax − b)∥22
+, then E∥A(˜x − x∗)∥22
+= d
+s−d−1∥Ax∗ − b∥22
+for
+s ≥ d + 2.
+• Sketch-and-Precondition: If we construct R−1 from the QR of SA, then cond(AR−1) ≤ 6, with high probability
+for s ≥ 2d.
+• LR approximation: If we compute Q = orth(AS), then E∥A − QQ⊤A∥2
+F ≤
+􀀀
+1 + k
+s−k−1
+
+· ∥A − Ak∥2
+F for
+s ≥ k + 2.
+From these results, traditional RandNLA-style guarantees (summarized in Sec. 2) are straightforward to derive. These
+results are all relatively easy to show for i.i.d. Gaussian matrices; and results of this form are common in NLA and
+scientific computing applications of RandNLA [94]. The basic question is whether we can obtain similar results with
+(faster) non-Gaussian sketches.
+Inversion bias. To answer this question, we need a notion of sketch quality (akin to subspace embedding) that can
+capture the “Gaussian-like” behavior—in the proportional regime. Working in the proportional regime, where the
+aspect ratio of the matrix is constant, is key here—it is much more realistic, and if the aspect ratio is not constant then
+JL-like results are straightforward to derive. One way to capture this Gaussian-like behavior is through inversion bias
+[52, 80]. The basic idea should be obvious: for a real-valued random variable X, we know that E[X−1] ̸=
+􀀀
+E[X]
+−1.
+A similar phenomenon occurs for random sketch matrices, A˜ = SA:
+E[(A˜⊤A˜)−1] ̸= (A⊤A)−1, even though E[A˜⊤A˜] = A⊤A. (5)
+This bias is especially pronounced in the proportional regime, due to the random singular value fluctuations described
+by the MP law.
+Why focus on the inverse? Let us for a moment consider a statistical perspective on sketching. Here, the sketched
+covariance matrix A⊤S⊤SA can be viewed as a sample covariance estimator of the “population covariance matrix”
+A⊤A ∈ Rd×d. A natural question is: how does the spectrum differ between the sample and the population covariance?
+RMT answers this by looking at the resolvent matrix:
+(A⊤S⊤SA − zI)−1 for z ∈ C \ R+.
+The Stieltjes transform (normalized trace of the resolvent, central to RMT) exhibits an inversion bias, leading to a
+discrepancy between the sample and population. In traditional RMT, controlling this inversion bias lets us characterize
+the limiting eigenvalue distribution as s, n, d → ∞. Recent works [52, 50, 48] have extended this RMT analysis to the
+non-asymptotic RandNLA theory, essentially showing that: If we can correct the inversion bias of the sketch A˜ = SA,
+then we can recover stronger Gaussian-like sketching performance for faster sketches across RandNLA tasks.
+Correcting the bias (for Gaussian sketches). When A˜ = SA is an s × d Gaussian sketch, scaled so that E[A˜⊤A˜] =
+A⊤A, then there is a very simple correction for the inversion bias:
+E
+
+(γA˜⊤A˜)−1
+= (A⊤A)−1 for γ =
+s
+s − d − 1
+.
+8
+This simple fix does not hold for other (faster) sketching methods that have been used in RandNLA, e.g., Hadamardbased
+projections, sub-Gaussian sketches, very sparse sketches, sampling methods, etc. The basic reason is that other
+sketches are not perfectly rotationally symmetric. Thus, among other things, they could lose rank (with very small
+probability) and/or suffer from “coupon collector” problems. In general, for faster sketching methods, the inversion
+bias occurs differently in each direction, and so we cannot correct it with a single dimensional rescaling factor.
+Nearly-unbiased sketches. Going beyond Gaussian sketches motivates the notion of a nearly-unbiased estimator [52].
+Definition 2 A random PSD matrix ˜ C is an (ϵ, δ)-unbiased estimator of C if there is an event E that holds with
+probability 1 − δ such that, when conditioned on E,
+EE [ ˜ C] ≈ϵ C and ˜ C ⪯ O(1) · C.
+Let S be an s × n random matrix such that
+√
+s S has i.i.d. O(1)-sub-Gaussian entries with mean zero and unit
+variance (i.e., a direct extension of a Gaussian sketch). Building on the Stieltjes transform analysis, it is possible to
+show that for this sketching matrix we can nearly correct inversion bias, in the sense that ( s
+s−dA⊤S⊤SA)−1 is an
+(ϵ, δ)-unbiased estimator of (A⊤A)−1 for ϵ = O(
+√
+d
+s ) and δ = e−cs (Proposition 4 in [52]). In other words, conditioned
+on a high probability event E, we have
+EE
+
+( s
+s−dA⊤S⊤SA)−1
+≈ϵ (A⊤A)−1, for ϵ = O
+√
+d
+s
+
+. (6)
+Let us compare/contrast this notion of an (ϵ, δ)-unbiased estimator with JL / subspace embeddings in Def. 1. For a
+subspace embedding, we have that
+Subspace embedding: (A⊤S⊤SA)−1 ≈η (A⊤A)−1, η = Θ
+r
+d
+s
+
+.
+Thus, we see that the average-case analysis in (6) is sharper than what is possible to recover with the high-probability
+subspace embedding analysis, by at least a
+√
+s factor.
+Averaging RandNLA estimators. Implications of this Modern RMT-style analysis for RandNLA are discussed in
+later sections. However, as an immediate consequence, we can establish various “model averaging” schemes for
+RandNLA-based estimators, that can be used in statistical/ML/optimization pipelines.
+The premise behind model averaging is that if we can produce a bias-corrected estimator ˜x, i.e., Bias2(˜x) ≪ Var(˜x),
+then we can boost its accuracy by averaging multiple independent copies of this estimator. When the estimator relies on
+some linear functional of the inverse matrix (A⊤S⊤SA)−1, as in sketched LS [80] and a number of other RandNLA
+algorithms [48], then this follows (with some small additional effort) from (6). For example, for q independent
+sub-Gaussian sketches Si of size s ≥ O(d+q), if we average the LS estimates ˜xi = argminx ∥Si(Ax−b)∥2, then the
+aggregate estimator ¯x = 1
+q
+Pq
+i=1 ˜xi satisfies [80]:
+E∥A¯x − b∥2 ≤ (1 + ϵ)∥Ax∗ − b∥2, for ϵ = O
+ d
+qs
+
+.
+Extending RMT-style analysis to fast sketching. Compared to classical JL or subspace embedding approaches,
+most RMT for sketching requires different “Gaussianization” assumptions and different parameter regimes (e.g., the
+proportional regime). Most out-of-the-box theory applies only to (expensive) dense Gaussian or (still expensive) dense
+sub-Gaussian sketching matrices. Given the widespread interest in fast sketching methods, a natural question is: Can
+we extend this line of work to fast sketches, e.g., sparse or structured?
+Several recent results have provided an affirmative answer to this question [63, 109, 52, 43, 34], including: nonasymptotic
+RMT-style analysis for sparse sketches based on Leverage Score Sparsification (LESS) [52, 43, 34] and
+asymptotic RMT-style analysis for structured sketches based on randomized Hadamard transforms [63, 109]. These
+results essentially show that certain fast sketching operators are “close” in a strong enough sense to sub-Gaussian
+matrices, typically by relying on two structural conditions which are needed for S to ensure small inversion bias:
+9
+1. Subspace embedding: this is the standard guarantee from Def. 1; using Modern RMT [26], sharp MP-style
+subspace embedding guarantees as in (4) can be recovered for fast sketching operators such as LESS [34].
+2. Restricted Bai-Silverstein inequality: this is the key novelty that provides a variance bound for random quadratic
+forms [52]; and it is related to the Hanson-Wright inequality [161].
+Based on these ideas, we can reduce the cost of applying sub-Gaussian sketches down from O(nds), while still
+recovering (6), i.e., we can construct more efficient sketches for which it is possible to correct inversion bias and recover
+other Gaussian RandNLA guarantees. For example, given a tall n × d matrix A, we can compute an s × d sketch SA
+(LESS embedding) in near-linear time ˜O(nd + sd2) such that ( s
+s−dA⊤S⊤SA)−1 is an (ϵ, δ)-unbiased estimator of
+(A⊤A)−1 with ϵ = O(
+√
+d
+s ), matching the guarantee for sub-Gaussian sketches (Theorem 8 in [52]).
+3.2 RMT for Sampling via DPPs
+The astute reader may wonder whether the developments described in Sec. 3.1 that hold for data-oblivious sketching
+methods also hold for data-aware sampling methods. After all, they are based on RMT-based sketching in the
+proportional regime, and in some sense sampling is inherently “non-RMT.” For example, it involves coordinate axes
+and coordinate-aligned subspaces, and lower bounds arise that are due to the Coupon Collector problem. Yet, using
+Determinantal Point Processes (DPPs), one can show that very similar RMT results hold for certain data-aware sampling
+methods [54].
+DPPs form a family of non-i.i.d. sampling distributions with a long history in applied mathematics [123, 20, 19, 98]
+that has received interest in ML due to their associations with diversity and volume [108]. In this context, one can define
+a DPP for a given n × d matrix A as a probability distribution over the row subsets of A: any subset S ⊆ {1, ..., n} is
+assigned a probability
+Pr(S) ∝ det(ASA⊤
+S), (7)
+where AS is the submatrix consisting of the rows of A indexed by S, and det(ASA⊤
+S) corresponds precisely to the
+squared |S|-dimensional volume spanned by those rows. Such a distribution naturally promotes the row subsets
+that capture more “information” about the matrix A, while minimizing the subset size. This translates to guarantees
+for Classical RandNLA tasks which match, and sometimes improve on, those based on Gaussian (or Gaussian-like)
+sketching. For examples, it has been shown [61, 93, 47] that when S is drawn according to (7) with subset size s, then
+it achieves a LR approximation guarantee that matches that of a Gaussian sketch:
+E ∥A − QQ⊤A∥2
+F ≤
+
+1 +
+k
+s − k + 1
+
+· ∥A − Ak∥2
+F , Q = orth(AS).
+This remarkable connection between DPPs and RandNLA has been exploited not only in LR approximation [61, 93, 47],
+but also in LS regression [57, 59] and iterative optimization [53, 143, 60], including inversion bias corrections similar
+to those that are possible for Gaussian and LESS sketches [57, 44]; see [54] for a detailed discussion. One way to
+explain this success is to view DPPs as a natural non-i.i.d. extension of leverage score sampling. Specifically, it can be
+shown that the marginal probability of the ith row of A appearing in a DPP sampled set S, i.e., Pr(i ∈ S), corresponds
+in a precise sense to the ridge-regularized leverage score of that row [41, 45]. These ridge leverage scores have been
+introduced (independently of DPPs) as the right sub-sampling technique for LR approximation and related tasks in a
+long series of RandNLA works, e.g., [3, 140, 162].
+These ideas have led to (theoretically) fast DPP sampling: from early approaches for exact sampling via eigendecomposition
+[98, 107, 84]; through so-called intermediate sampling via leverage scores [41, 45, 30]; to Markov chain
+Monte Carlo sampling [6, 4, 5, 7]. Many of these algorithms are available in the Python package DPPy [81].
+Nevertheless, there is still an inevitable computational overhead in using non-i.i.d. sampling methods, such as
+DPPs, in place of popular i.i.d. sampling techniques such as leverage score and row-norm sampling. This trade-off
+is justified when the quality and small size of the target sample is of paramount importance, e.g., in active learning,
+Bayesian optimization, clustering, or coreset selection. However, the RMT techniques for analyzing DPPs have also
+found applications in developing new guarantees for i.i.d. sampling. In particular, it has been shown recently [60, 49]
+10
+that after preprocessing matrix A with a randomized Hadamard transform, an i.i.d. uniform sample of O(k log k) rows
+with high probability contains a DPP sample of size k. This has unlocked new approaches in using RandNLA sampling
+methods for stochastic optimization methods such as Sketch-and-Project (see Sec. 4).
+4 Advances in RandNLA for Optimization
+In stochastic optimization, the goal is to minimize (or maximize) an objective function, when one or more of the input
+parameters is subject to randomness. It arises in many areas, most prominently with stochastic gradient descent (SGD)
+based methods for training ML models [21]. Leveraging Modern RandNLA techniques and theory (from Sec. 3) within
+the framework of stochastic optimization leads to the Iterative Sketching paradigm (of Fig. 1). This has manifested itself
+in many ways, including: PW-SGD [175], a variant of SGD which is preconditioned and weighted using RandNLA
+techniques; Subsampled Newton [75, 159, 172] and Newton Sketch [152], which apply the Sketch-and-Solve paradigm
+to Hessian estimation; and Sketch-and-Project [91, 56, 60], a modern extension of the classical Kaczmarz method
+[103], which uses sketching to achieve implicit preconditioning in stochastic methods. Recent advances in RandNLA
+(described in Sec. 3.1) have proven fruitful in obtaining theory for stochastic optimization algorithms based on Iterative
+Sketching, which comes with much smaller theory-practice gap compared to traditional approaches.
+Consider the following standard finite-sum optimization task:
+Minimize f(x) =
+1
+n
+Xn
+i=1
+ψi(x), (8)
+where x is a parameter (or weight) vector, and where each ψi(x) corresponds to the loss for a single data point. In
+optimization, we generally approach this problem by iteratively refining a sequence of estimates x0, x1, x2, ..., relying
+on local information about the objective function. We can divide optimization methods into first-order methods,
+which use gradient (first derivative) information of f at xt, e.g., gradient descent; and second-order methods, which
+additionally rely on Hessian (second derivative) information.
+Although introducing randomization in optimization algorithms has proven very effective in ML, with variants
+of SGD (AdaGrad, Adam, SVRG, etc.) being widely-used in practice, SGD-based methods still often suffer from
+instability, large variances, and extreme sensitivity to hyperparameter choice [177, 97]. In this context, randomized
+algorithms based on Modern RandNLA theory can be used to provide better stability, to inject better curvature
+information, and to reduce communication and computation costs.
+4.1 Gradient Sketch
+With SGD, we estimate the first-order (gradient) information by subsampling the components ψi of the objective, and
+using those to construct an unbiased estimate ˆgt:
+xt+1 = xt − ηtˆgt, where E[ˆgt] = ∇f(xt).
+Despite its popularity, SGD has a number of limitations, e.g., large variance E
+
+∥ˆgt−gt∥2
+
+, which slows the convergence
+near the optimum, as well as sensitivity to hyper-parameters (such as step size, mini-batch size, etc.). RandNLA offers
+a number of techniques for addressing these limitations, such as using weighted gradient sampling based on leverage
+scores or other importance scores, as well as using a sketching-based preconditioner. We consider the following.
+PreconditionedWeighted SGD. Consider the Preconditioned Weighted SGD (PW-SGD) method (which is shown here
+for the LS problem, f(x) = 1
+n∥Ax − b∥2, but which is applicable far beyond this setting [74, 1, 87, 42]):
+1: Compute SA with some sketching operator S
+2: Compute R such that SA = QR−1 for orthogonal Q
+3: Compute leverage score estimates˜li for A
+4: for t = 0 to T − 1 do
+5: Compute gt ← 1
+s
+Ps
+i=1
+Z
+˜l
+Ii
+∇ψIi (xt), Pr(Ii) ∝ ˜lIi .
+6: Compute xt+1 ← xt − ηtRR⊤gt
+7: end for
+11
+This algorithm uses a sketching operator S to construct the R, which is the preconditioner of the problem, since its
+spectrum approximates the spectrum of (the inverse of) A. Moreover, the algorithm uses leverage score estimates of A,
+which are used for subsampling the gradients (but this can be replaced by other sketching/sub-sampling schemes).
+Thanks to a combination of preconditioning and importance sampling, this version of PW-SGD can completely
+avoid any condition number dependence in its convergence rate [34]. In particular, suppose that the leverage score
+estimates satisfy: ˜li ≥ li(A)/α for all i. Then, letting ηt := β
+1+βt/8 for β = k/8
+k+4αd , this version of PW-SGD satisfies:
+E[f(xt) − f(x∗)] ≤
+f(x0)
+1 + st/(cαd)
+∀t≥1.
+The key advantage here is that the resulting iteration complexity t = O(d/sϵ) is entirely independent of the number
+of data points n or of the condition number κ of matrix A [34], whereas classical SGD may require as many as
+O(nκ2/sϵ) iterations. For reaching a moderate precision solution (the regime of greatest interest in ML and data
+science applications), the computational cost comparison shows that this method is faster than Sketch-and-Solve or
+Sketch-and-Precondition [34].
+There are also other RandNLA-based approaches for sketching the gradient information of the objective: in
+non-finite-sum settings, e.g., Sega [96]; for distributed/federated learning, e.g., FetchSGD [160]; methods inspired by
+randomized coordinate descent [147, 111]; and randomized preconditioning for other stochastic gradient methods, e.g.,
+Preconditioned SVRG and SVRN [87, 42], and others [90, 117].
+4.2 Hessian Sketch
+RandNLA methods have proven particularly effective at efficiently extracting second-order information about the
+optimization objective [159, 152, 48]. This has led to many sketching-based Newton-type optimization algorithms.
+Recall that Newton’s method represents the paradigmic second-order optimization algorithm, which minimizes a local
+quadratic approximation of the objective using gradient gt = ∇f(xt) and Hessian Ht = ∇2f(xt):
+xt+1 = xt + argmin
+v
+n
+g⊤
+t v +
+ηt
+2
+v⊤Htv
+o
+= xt − ηtH−1
+t gt.
+As an example, consider a standard Generalized Linear Model (GLM), f(x) = 1
+n
+Pn
+i=1 li(a⊤
+i x) + γ
+2 ∥x∥2, where a⊤
+i x
+represents a linear prediction associated with a data point ai ∈ Rd, and loss li encodes the prediction error, dependent
+on a label yi. For instance, in logistic regression, we have yi = ±1 and li(a⊤
+i x) = log(1+e−yia⊤
+i x). Here, the Hessian
+at xt is given by:
+∇2f(xt) =
+1
+n
+A⊤DtA + γI, Dt := diag(l′′
+1 (a⊤
+1 xt), ..., l′′
+n(a⊤
+nxt)),
+where the dominant cost is the O(nd2) matrix multiplication A⊤DtA. It is natural to reduce this cost with RandNLA
+sketching or sub-sampling, by repacing A⊤DtA with A˜⊤
+t A˜t where A˜t = StD1/2
+t A for some sketching matrix St. One
+version of this leads to the Newton Sketch [152]:
+xt+1 = xt − ηt ˆH −1
+t gt, ˆHt =
+1
+n
+A˜⊤
+t
+A˜t + γI.
+Standard RandNLA guarantees such as the subspace embedding are sufficient (although not necessary) to ensure that
+ˆH
+t provides a good enough approximation to enable accelerated local convergence in time ˜O(nd).
+These approaches have also been extended to distributed settings via RMT-based model averaging, with applications
+in ensemble methods, distributed optimization, and federated learning [110, 109, 144, 48, 92]. Further RandNLA-based
+Newton-type methods include: Subsampled Newton [75, 159, 18, 17]; Hessian approximations via randomized Taylor
+expansion [1] and low-rank approximation [77, 55]; Hessian diagonal/trace estimates via Hutchinson’s method [136]
+and Stochastic Lanczos Quadrature, particularly for non-convex problems, e.g., PyHessian [176], AdaHessian [177];
+and finally Stochastic Quasi-Newton type methods [106, 137].
+12
+4.3 Sketch-and-Project
+The Sketch-and-Project framework has gained attention as a powerful methodology within the Iterative Sketching
+paradigm of RandNLA. While this framework has found applications across the stochastic optimization landscape, it
+originally arose from randomized algorithms for solving systems of linear equations.
+Solving an m × n linear system Ax = b can be viewed as an instance of the LS problem, i.e., minimizing the
+objective f(x) = ∥Ax − b∥22
+. As discussed in Sec. 2.2, Classical RandNLA has addressed this problem in the highly
+over- or under-determined settings (i.e., when A is very tall or wide). However, in many applications, particularly
+high-dimensional settings that arise in ML, m and n are (equal or) of comparable size.
+For these nearly-square matrix problems, randomization can still be beneficial, in particular when using Modern
+RandNLA methods. For instance, consider the classical Kaczmarz algorithm, which solves a linear system of m
+equations a⊤
+i x = bi via the following iterative procedure, starting from some x0:
+1: for t = 0 to T − 1 do
+2: Select index It ∈ {1, ...,m}
+3: xt+1 ←Project xt onto the solutions of equation a⊤
+It
+x = bIt
+4: end for
+This simple procedure has been known for a long time [103], but only with the use of randomization are we able to
+characterize its convergence [166]: if the Kaczmarz method selects index It randomly, with probability proportional to
+∥aIt∥22
+, then:
+E∥xt − x∗∥22
+≤
+
+1 −
+σ2
+min(A)
+∥A∥2
+F
+t
+∥x0 − x∗∥22
+.
+We can interpret this Randomized Kaczmarz (RK) method as a Weighted SGD algorithm solving the finite-sum
+minimization problem (8) with ψi(x) = (a⊤
+i x − bi)2 [147], drawing a parallel with PW-SGD as described in Sec. 4.1.
+However, this paradigm becomes quite different from PW-SGD once we select more than one equation at a time,
+giving rise to Sketch-and-Project [91]: Sample a random k × m matrix S = S(t), and project xt onto the solutions of
+SAx = Sb:
+xt+1 = argmin
+x
+∥xt − x∥22
+subject to SAx = Sb.
+We recover RK if the matrix S is chosen to be the indicator vector of the equation It. However, this general framework
+(with Modern RandNLA tools from Sec. 3) allows for other natural choices, such as selecting blocks of equations
+(Block Kaczmarz, e.g., [146, 145, 154]) or sketching the input matrix A using any of the methods described earlier. The
+Sketch-and-Project framework has been used to capture and extend other stochastic optimization methods, including
+Coordinate Descent [114, 111, 88], and to develop more general purpose first- and second-order optimization algorithms
+[89, 106, 95, 178].
+Going beyond RK, the convergence analysis of Sketch-and-Project has proven much more challenging, largely due
+to the complex interdependence between the distribution of the sketching matrix S and the spectrum of the input matrix
+A. However, by using tools from Modern RandNLA theory [155, 143, 50], we can relate this convergence to the quality
+of the sketch SA as a low-rank approximation of the data [56]:
+E∥xt − x∗∥22
+≲
+
+1 −
+kσ2
+min(A)
+E∥A − APSA∥2
+F
+t
+∥x0 − x∗∥22
+. (9)
+Here, E∥A − APSA∥2
+F is the projection error of the low-rank approximation of A produced from the sketch SA, same
+as in equation (3) from Sec. 2.3 (except sketched on the other side). This analysis has revealed new classes of problems
+(often overlapping with ML domains that exhibit low-rank structure) for which Sketch-and-Project methods offer
+dramatically improved peformance over the more traditional Sketch-and-Precondition paradigm [60, 49], thanks to the
+implicit preconditioning phenomenon that is described by (9).
+13
+5 Advances in RandNLA for ML and Statistics
+So far, we have primarily focused on how RandNLA can be used to address ML and data science problems from a
+purely algorithmic perspective: the data (e.g., matrix A and vector b) is given and deterministic, and our goal is to
+directly compute or estimate a property of the data (e.g., the LS solution). With this problem formulation, randomization
+has entered solely from the algorithm design perspective, and thus it is fully controllable by the practitioner.
+However, when we consider the same problems from a statistical perspective, the data is often assumed to be random
+itself, e.g., coming from some data distribution (which may or may not be known) and distorted by some random noise
+(e.g., Gaussian). In this case, our goal is often to estimate a quantity that may depend on an unobserved part of the data
+distribution, in which case we must account for the generalization error, in addition to the approximation error that was
+our focus so far. In this section, we delve into how randomization coming from RandNLA interacts with the inherent
+data randomness, and how that affects the design and implementation of these methods.
+5.1 Statistical Learning Approaches
+We start by considering a statistical learning theory perspective on generalization error, which is most traditionally
+exemplified by the probably approximately correct (PAC) model of learning. Here, we often assume very little about
+the underlying data distribution, leading to a worst-case view of the generalization error. This forces our algorithmic
+approaches to exhibit a certain degree of robustness to the unobserved data. We show that RandNLA techniques
+naturally inject such robustness into ML algorithms, as they are also designed to work well under worst-case settings.
+Robust semi-supervised learning. As a key motivating example, let us return to LS regression. So far, we have
+framed this problem so that given a matrix A and vector b, we want to find x∗ = argminx ∥Ax − b∥22
+. However, what
+if part of this data is withheld, for instance due to the cost of procuring the labels?
+Formally, suppose that we are given a data matrix A ∈ Rn×d with n unlabeled data points: a1, . . . , an ∈ Rd
+(transposed rows of A). For each point ai, we can decide to query the random label bi ∈ R. Our goal is to query subset
+S ⊆ {1, ..., n} of at most s ≪ n labels and output ˆx that has small error
+Ef(ˆx) := E
+1
+n
+Xn
+i=1
+(a⊤
+i ˆx − bi)2 = E
+1
+n
+∥Aˆx − b∥22
+.
+Note that, due to the underlying statistical randomness and the fact that we do not have access to all of the data, this is
+now a generalization error, and the problem is not purely computational in nature. The question is: How should we
+choose the data points to label?
+This task might seem dramatically different than the classical LS task that is tackled by Classical RandNLA. Yet,
+recent works have shown that RandNLA subsampling techniques, such as leverage score sampling and DPPs, play a
+crucial role in ensuring good generalization error in this setting. In particular, it is known (e.g., [124, 59]) that for any
+fixed A and random b, if we query a subset S of s = O(d log d + d/ϵ) entries of b sampled according to A’s leverage
+scores, and compute ˆx = argminx ∥ASx − bS∥22
+, then:
+Ef(ˆx) ≤ (1 + ϵ) min
+x
+Ef(x).
+Crucially, the sampling method used here does not require any knowledge about the label distribution, which means
+that it gives a very robust generalization error guarantee. In fact, one can show that randomization is actually necessary
+in the label selection, to protect against adversarial label distributions [58].
+This robust learning via RandNLA sampling has been further refined by relying on non-i.i.d. approaches such as
+DPPs (using tools from Sec. 3.2) and related methods [57, 59, 33]. It has also been extended to other regression losses via
+different sampling schemes (inverse scores, Lewis weights, ridge leverage, sensitivity scores, etc.) [46, 32, 150, 141, 31],
+as well as to other statistical learning settings such as single index models [79] and generalized linear models [101].
+14
+Kernel-based learning. RandNLA subsampling methods have also been extended to “non-linear” learning tasks, via
+kernel-based learning methods. These approaches work by constructing a mapping ϕ : X → F from the data space X
+to an expanded feature space F. While the expanded data vectors are never explicitly computed, we can learn about the
+geometry of the dataset by looking at the pairwise inner products between ith and jth data point, which are obtained
+through the so-called kernel function k(xi, xj) = ϕ(xi)⊤ϕ(xj). In the resulting learning problem, we receive a dataset
+(xi, yi)ni
+=1 ∼ D, and construct an estimator ˜ f for f∗ by minimizing a regularized objective over the kernel space F:
+min
+f∈F
+1
+n
+Xn
+i=1
+ℓ(f(xi), yi) +
+λ
+2
+∥f∥2
+F,
+where ∥f∥F is the norm induced by F and ℓ is a loss function. Using square loss and the representer theorem, this can
+be cast as kernel ridge regression (KRR), which is equivalent to solving the following regularized linear system:
+(K + nλI)α = y, (10)
+where K =
+
+ϕ(x(i))⊤ϕ(x(j))
+
+ij is the n × n PSD kernel matrix that includes all pairwise inner products in the feature
+space, and α is a vector from which we can recover the prediction function f as f(xi) = [Kα]i.
+Naturally, we could now use RandNLA techniques, such as those discussed in Sec. 4, to solve (10) directly. However,
+this being a statistical learning problem significantly affects our algorithmic choices. To start, note that we are not given
+K as input, but rather we must compute each of its entries via the kernel function k(·, ·). In fact, even just forming K at
+the cost of n2 kernel evaluations is a computational bottleneck we may wish to avoid. On the other hand, due to the
+presence of generalization error, we do not need to solve the problem to high precision.
+We can address both of these considerations by exploiting the fact that the kernel matrix K has a PSD structure. This
+allows us to approximate it efficiently without even forming the entire matrix K by relying on a Nyström approximation:
+˜K
+= KS(S⊤KS)−1S⊤K,
+where S is an n × s subsampling matrix such that KS selects s columns from K and S⊤KS selects an s × s principal
+submatrix of K. Thus, the Nyström method requires only ns kernel evaluations, i.e., sublinear in the size of K. This
+approach is closely linked to the LR approximations described in Sec. 2.3: using the PSD property of the kernel matrix
+K, we can express it as K = A⊤A for some matrix A; then, the Nyström approximation is given by ˜K = A⊤PASA,
+and its spectral/Frobenius error is ∥K − ˜K∥ξ = ∥A−PASA∥2ξ
+, which corresponds to the LR projection error (3) for A.
+A long line of works at the intersection of ML and RandNLA have shown that this method can be used to produce
+kernel ridge regression estimators with strong generalization guarantees faster than it takes to form the kernel matrix
+K. While early efforts proposed using uniform subsampling to select the rows/columns of K [170, 11, 163], more
+recent works have shown that RandNLA-style subsampling using ridge leverage scores yields more robust estimators
+[3, 140, 162]. This has been further improved with DPP sampling [45, 28, 47].
+Additional related works on the Nyström method include applications to Gaussian Process regression [28, 29],
+Nyström-based sketching [86, 14] and preconditioning [8, 78, 77, 55], sublinear time LR approximation of other
+structured matrices [142, 13], and sublinear time DPP sampling algorithms [45, 30, 7].
+5.2 Statistical Inference Approaches
+Next, we consider how RandNLA interacts with and informs statistical inference approaches to modeling and analyzing
+data. In statistical inference, it is common to impose strict assumptions on the generative model of the data, e.g., that the
+feature vectors are coming from a Gaussian or sub-Gaussian distribution, and that the predicted variable follows some
+underlying linear model distorted by noise. This generative modeling approach enables a wide range of inferential tools
+for designing, optimizing and evaluating estimators. These tools include cross-validation, feature selection, reliable
+confidence intervals, the Bootstrap method, the Jackknife, etc. This might seem in stark contrast to the RandNLA
+approach to data, which has largely been centered on robustness to the worst-case and avoiding data assumptions. As
+we have seen in previous sections, a typical framework for RandNLA algorithms is that we are given an arbitrary input
+matrix A with no distributional assumptions.
+15
+Sketching Statistics
+Big data Population
+Arbitrary input Gaussian input
+Sketch Sample
+Algorithmic
+Gaussianization
+Statistical model
+Figure 2: An illustration of the connection between RandNLA and statistical inference. Even though the input matrix A
+for a RandNLA algorithm is often arbitrary and deterministic, the Algorithmic Gaussianization effect of sketching turns
+this matrix into a random data sample A˜ (the sketch), which follows a generative model like those in statistical inference.
+To see that there is a strong connection, however, recall that instead of operating directly on A, we first compute a
+smaller sketch A˜ = SA, and then we use that sketch to estimate the target properties of the data. This means that, even
+though the input matrix A is deterministic and arbitrary, the matrix A˜ which we use for the data analysis follows a
+well-defined generative model—and one which, for many sketching operators, is very close to a sub-Gaussian data
+model used in statistical inference. See Fig. 2 for an illustration. This motivates a statistical view of the numerical
+algorithms based on sketching, unlocking the vast wealth of inferential tools that can be applied to any approaches
+based on the Sketch-and-Solve paradigm and beyond.
+Bootstrap error estimation for sketching. One application of this viewpoint is error estimation. A common shortcoming
+of Classical RandNLA error guarantees is that they are overly pessimistic due to their worst-case nature,
+and therefore, they do not provide accurate predictions of the actual error incurred by the produced estimates. For
+instance, consider the sketched LS estimator: given a deterministic matrix A ∈ Rn×d and a vector b ∈ Rn, reduce the
+problem with a random sketching matrix S ∈ Rs×n, defining ˜ A := SA and˜b := Sb, and use that to compute ˜x :=
+argminx ∥ ˜ Ax −˜b∥2. How well does this particular estimate ˜x approximate the optimum x∗ := argminx ∥Ax − b∥2?
+In other words, we would like to efficiently compute a numerical estimate ˜q(α) such that
+∥˜x − x∗∥2 ≤ ˜q(α) with probability 1 − α.
+In statistical inference, this is often done using the Bootstrap method: by artificially generating another estimate ˆx
+such that the fluctuations of ˆx − ˜x are similar to the fluctuations of ˜x − x∗. This so-called bootstrapped estimate ˆx
+can be obtained as the LS solution obtained by “perturbing” ˜ A and˜b (e.g., by sub-sampling with replacement). While
+traditional analysis of the boostrap has required a sub-Gaussian model of the data, in RandNLA we can rely on the
+Gaussianizing effect of sketching and RMT analysis to show that bootstrap error estimation is provably reliable, even
+for arbitrary input matrices A [118, 120].
+Separation between sketching methods. Another application of the statistical viewpoint on RandNLA is providing
+a fine-grained performance analysis of different sketching or estimation methods which are indistinguishable under
+worst-case bounds [63, 35, 109, 51]. In particular, such analysis has been performed for the above sketched LS estimator,
+showing that with a fixed sketch-to-data aspect ratio s/n, asymptotic error for orthogonal (Hadamard or Haar) sketches
+is less than for i.i.d/sub-Gaussian sketches [63, 109].
+Further related advances in applying statistical inference techniques to RandNLA include fine-grained analysis of
+RandNLA importance sampling, e.g., [121, 153, 122], and LR approximation [173], bootstrapping sketched covariance
+estimation [119], as well as uncertainty quantification for randomized linear system solvers [16, 38].
+16
+0 10 20 30 40 50
+Sketch size
+0
+10
+20
+30
+40
+50
+Approximation factor
+Worst-case
+Using RMT
+Experiments
+Figure 3: Fine-grained RMT analysis of LR approximation reveals a multiple-descent phenomenon that is not predicted
+by worst-case analysis.
+5.3 Connections with Modern RMT
+One of the key tools in Modern RandNLA for developing fine-grained understanding of the performance of RandNLA
+algorithms, including those inspired by the above statistical inference viewpoint, has been the use of techniques from
+both asymptotic and non-asymptotic RMT. These techniques are particularly important when dealing with matrices
+with a statistically well-understood data distribution, where worst-case performance guarantees can be significantly
+misleading.
+While Classical RandNLA has focused on describing the performance of the algorithms solely in terms of the
+dimensions of the input (or possibly also its sparsity), it has been shown that for many tasks it is the spectral decay
+profile of the data (i.e, the rate of descrease of the singular values of a matrix A) that is most informative about the
+performance of these algorithms. In fact, for many ML tasks, the spectral decay profile of the data can often be sharply
+characterized, for example, in terms of whether we expect a heavy-tailed, short-tailed, or spiked profile [130]. This can
+have a dramatic effect on the design and performance of RandNLA algorithms.
+Multiple-descent in LR approximation. As an example, consider the task of LR matrix approximation. As discussed
+in Sec. 2.3, in this task our goal is to construct a near-optimal rank k approximation of an m × n matrix A. A simple
+way of doing this involves computing an m × k sketch AS and then projecting the matrix A onto the rank k subspace
+defined by AS. Then, we can measure the quality of the output by comparing its error to the error of the best rank k
+approximation of A, obtained via the Top-k Truncated Singular Value Decomposition (Top-k SVD):
+Low-rank approximation factor =
+∥A − PASA∥2
+F
+∥A − Ak∥2
+F
+,
+where ∥A−PASA∥2
+F is the LR projection error as in (3), and ∥A−Ak∥2
+F is the Top-k SVD error. Classical worst-case
+analysis suggests that even for Gaussian-like sketching methods, the approximation factor for this basic approach
+is large and grows with k, as seen in Fig. 3 (black dotted line). This has been addressed by computationally more
+expensive approaches that involve increasing the sketch size or using block power iteration [94]. However, recent
+RMT-style analysis (Fig. 3, red solid line; see [47, 50]) reveals that for many data matrices, the true approximation
+factor is much smaller, i.e., it typically does not grow with k, and we can characterize it fully based on the spectral
+decay profile of the matrix A. These ideas have been further developed in other applications of RandNLA, including
+randomized PCA [35], Gaussian Processes [28], iterative optimization [48, 109], and in connections with the double
+descent phenomenon in over-parameterized ML models [51].
+17
+Implicit regularization in sketching. Another important consequence of the fine-grained RMT analysis in RandNLA
+is a characterization of the implicit regularization phenomenon. Implicit regularization commonly refers to the
+regularizing effect that stochastic algorithms (such as SGD) have on the trained ML model [149, 130]; but, fundamentally,
+it has to do with explicit statistical problems that fast approximation algorithms implicitly solve exactly [129, 125].
+Empirical results [168, 44] have shown that such a regularizing effect is caused by the stochasticity coming from the
+use of sketching operators; and recent theory makes this precise [51, 112, 113].
+A key example of this phenomenon occurs in sketched ridge regression, which is an extension of the LS task, where
+given A, b and parameter γ, we aim to approximate x∗ = argmin ∥Ax − b∥22
++ γ∥x∥22
+by relying on the sketched data
+SA and Sb. This raises the question of what regularization parameter ˜γ should be used when computing the sketched
+estimate:
+˜x = argmin
+x
+∥S(Ax − b)∥22
++ ˜γ∥x∥22
+.
+Here, again, Classical RandNLA analysis is not sensitive enough to detect the implicit regularization effect, and suggests
+that the correct regularization parameter should be the same as for the original task, ˜γ = γ. However, recent fine-grained
+results have enabled characterizing the bias of the sketched estimators showing that we must shrink the regularization
+parameter ˜γ to correct for implicit regularization [44]:
+E[˜x] ≍ x∗, if ˜γ = γ ·
+
+1 −
+dγ
+s
+
+,
+where dγ = tr(A⊤A(A⊤A + γI)−1) is the γ-effective dimension of A and s is the sketch size. Similar implicit
+regularization results have been shown for sketching-based distributed regression [64], sampling-based ensemble
+methods [112], stochastic optimization [48], LR approximation [50, 113] and randomized rounding [62].
+6 Putting Randomness into Next-generation Software
+Beyond BLAS/LAPACK to RandBLAS/RandLAPACK. One of the promises of RandNLA has been that it will
+lead to improved implementations in practice. Indeed, the conclusion of the Blendenpik paper [9], in 2010, was
+that “Blendenpik beats LAPACK’s direct dense least-squares solver by a large margin on essentially any dense tall
+matrix,” and that “these results show the potential of random-sampling algorithms and suggest that random-projection
+algorithms should be incorporated into future versions of LAPACK.”1 This, in 2024, is timely: recent years have
+seen the convergence of several unprecedented changes, including formidable new system design constraints and
+revolutionary levels of hardware heterogeneity; and, due to these changes, much of the essential software infrastructure
+of computational science and engineering is, or will soon be, obsolete. These challenges motivated the BALLISTIC
+(“Basic ALgebra LIbraries for Sustainable Technology with Interdisciplinary Collaboration”) project [40], which aims
+to enhance and update BLAS, LAPACK, and ScaLAPACK (“Scalable Linear Algebra PACKage”) by “incorporating
+them into a layered package of software components ... that provides users seamless access to state-of-the-art solver
+implementations through familiar and improved Sca/LAPACK interfaces.”
+As part of the BALLISTIC project [40], we are introducing the use of RandNLA methods into BLAS and LAPACK,
+leading to RandBLAS and RandLAPACK [138]. RandBLAS will be a library that concerns basic sketching for dense
+data matrices (with a reference implementation in C++). Analogous to the original BLAS, it will be a “contract”
+between algorithm developers and hardware developers. RandLAPACK will be a library that concerns algorithms for
+solving traditional linear algebra problems and advanced sketching functionality (to be written in C++ and built on
+1For readers not familiar with it, LAPACK (“Linear Algebra PACKage”) is a standard software library for NLA which provides routines for
+solving systems of linear equations and linear least squares, eigenvalue problems, and singular value decomposition, as well as routines to implement
+the associated matrix factorizations such as LU, QR, Cholesky and Schur decomposition. It relies on an underlying BLAS (“Basic Linear Algebra
+Subprograms”) implementation to provide efficient and portable computational building blocks for its routines, where BLAS is a specification that
+prescribes a set of low-level routines for performing common linear algebra operations such as vector addition, scalar multiplication, dot products,
+linear combinations, and matrix multiplication [15]. Importantly, although the BLAS specification is general, BLAS implementations are often
+optimized for speed on a particular machine, and they can bring substantial performance benefits, e.g., since BLAS implementations can take
+advantage of special floating point hardware.
+18
+BLAS++/LAPACK++ portability layer). Analogous to the original LAPACK, it will consist of three main “drivers” (LS
+and optimization, LR approximation, and full-rank decompositions, in the case of RandLAPACK), and it will have
+“computational routines” (such as advanced sketching and error estimation). The hope is that RandBLAS grows to
+become a “community standard” for RandNLA, more broadly than RandLAPACK, in the sense that its API would see
+wider adoption than any single implementation.
+The connection with and value of Modern RandNLA for RandBLAS/RandLAPACK (and other such software
+projects) is subtle but important: due to the use of RMT-based ideas, in particular Def. 2 of a nearly-unbiased estimator,
+we can obtain a much smaller theory-practice gap than was possible with Classical RandNLA, which depended on the
+notion of a subspace embedding from Def. 1, for a broad range of implementations [44, 109, 110]. For implementations
+in the past, one often used expensive Gaussian random projections to obtain stronger theory; and then implementations
+may or may not have used Gaussian random projections; thus leading to a potentially-large theory practice gap. However,
+with the methods of Modern RandNLA, which with (6) provide stronger control on the inversion bias, one can hope to
+analyze the distribution being implemented.
+Beyond Single-machine Shared-memory. Going beyond the single-machine shared-memory setup, recent work within
+ML has focused on model training and inference: often with GPUs rather than CPUs; often in parallel/distributed setups;
+and often using low-precision computation. Classical RandNLA methods have proven successful here, in particular
+in comparison to heavily hyperparameterized SGD methods [177]. An emerging challenge with training and serving
+these models more generally involves memory and communication bottlenecks. In particular, ML applications are often
+bottlenecked by intra/inter-chip and communication across/to ML accelerators, rather than compute, a phenomenon
+referred to as the memory wall problem [83]. Quantization is one solution [82], and recent work (using Modern
+RandNLA theory) suggests the promise of using RandNLA methods here too [116].
+7 Concluding thoughts
+There are many topics we did not cover: data-driven methods for learning good sketching operators [99, 100, 36];
+RandNLA methods for tensor decompositions [169, 115, 76, 102]; RandNLA methods in streaming/online environments
+[27]; probabilistic numerics [16]; as well as topics such as Hutchinson and spectral function methods [158, 177], using
+randomness deep inside an algorithm, e.g., for pivot rule decisions, using these methods for the theory/practice of
+neural networks, e.g., NTK and Nystromformer, using these methods for quantization and low-precision computation
+[82, 83, 62], and using these methods to deal with graph-related and other structured matrices such as Laplacians
+[70, 105, 127]. In many of these cases, it is increasingly-important to identify core linear algebraic structures and build
+algorithmic/statistical methods around them (rather than “tacking” them on later as a “band aid” to fix problems that
+arise when one ignores key linear algebraic issues). This will be increasingly-important as heterogeneous hardware
+trends and ML training trends continue to grow. We expect the “Modern” theoretical tools developed by/for RandNLA
+that we have covered will be useful in these and other situations.
+Acknowledgments
+MD would like to acknowledge NSF CAREER for partial support. MWM would like to acknowledge the NSF and
+ONR via its BRC on RandNLA for partial support of this work.
+References
+[1] Naman Agarwal, Brian Bullins, and Elad Hazan. Second-order stochastic optimization for machine learning in
+linear time. The Journal of Machine Learning Research, 18(1):4148–4187, 2017.
+[2] Nir Ailon and Bernard Chazelle. The fast Johnson–Lindenstrauss transform and approximate nearest neighbors.
+SIAM Journal on computing, 39(1):302–322, 2009.
+19
+[3] Ahmed El Alaoui and Michael W. Mahoney. Fast randomized kernel ridge regression with statistical guarantees.
+In Proceedings of the 28th International Conference on Neural Information Processing Systems, pages 775–783,
+2015.
+[4] Nima Anari and Michał Derezi´nski. Isotropy and Log-Concave Polynomials: Accelerated Sampling and High-
+Precision Counting of Matroid Bases. Proceedings of the 61st Annual Symposium on Foundations of Computer
+Science, 2020.
+[5] Nima Anari, Michał Derezi´nski, Thuy-Duong Vuong, and Elizabeth Yang. Domain sparsification of discrete
+distributions using entropic independence. Proceedings of the 13th Innovations in Theoretical Computer Science
+(ITCS) conference, 2022.
+[6] Nima Anari, Shayan Oveis Gharan, and Alireza Rezaei. Monte carlo markov chain algorithms for sampling
+strongly Rayleigh distributions and determinantal point processes. In 29th Annual Conference on Learning
+Theory, pages 103–115. PMLR, 23–26 Jun 2016.
+[7] Nima Anari, Yang P Liu, and Thuy-Duong Vuong. Optimal sublinear sampling of spanning trees and determinantal
+point processes via average-case entropic independence. In 2022 IEEE 63rd Annual Symposium on
+Foundations of Computer Science (FOCS), pages 123–134. IEEE, 2022.
+[8] Haim Avron, Kenneth L Clarkson, and David P Woodruff. Faster kernel ridge regression using sketching and
+preconditioning. SIAM Journal on Matrix Analysis and Applications, 38(4):1116–1138, 2017.
+[9] Haim Avron, Petar Maymounkov, and Sivan Toledo. Blendenpik: Supercharging LAPACK’s least-squares solver.
+SIAM Journal on Scientific Computing, 32(3):1217–1236, 2010.
+[10] Haim Avron, Esmond Ng, and Sivan Toledo. Using perturbed QR factorizations to solve linear least-squares
+problems. SIAM Journal on Matrix Analysis and Applications, 31(2):674–693, 2009.
+[11] Francis Bach. Sharp analysis of low-rank kernel matrix approximations. In Conference on learning theory, pages
+185–209. PMLR, 2013.
+[12] J. Baik and J. W. Silverstein. Eigenvalues of large sample covariance matrices of spiked population models.
+Journal of Multivariate Analysis, 97(6):1382–1408, 2006.
+[13] Ainesh Bakshi and David Woodruff. Sublinear time low-rank approximation of distance matrices. Advances in
+Neural Information Processing Systems, 31, 2018.
+[14] Oleg Balabanov, Matthias Beaupère, Laura Grigori, and Victor Lederer. Block subsampled randomized Hadamard
+transform for low-rank approximation on distributed architectures. arXiv preprint arXiv:2210.11295, 2022.
+[15] R. Barrett, M. Berry, T. F. Chan, J. Demmel, J. Donato, J. Dongarra, V. Eijkhout, R. Pozo, C. Romine, and H. Van
+der Vorst. Templates for the Solution of Linear Systems: Building Blocks for Iterative Methods, 2nd Edition.
+SIAM, Philadelphia, 1994.
+[16] Simon Bartels, Jon Cockayne, Ilse CF Ipsen, and Philipp Hennig. Probabilistic linear solvers: a unifying view.
+Statistics and Computing, 29:1249–1263, 2019.
+[17] Albert S Berahas, Raghu Bollapragada, and Jorge Nocedal. An investigation of Newton-sketch and subsampled
+Newton methods. Optimization Methods and Software, 35(4):661–680, 2020.
+[18] Raghu Bollapragada, Richard H Byrd, and Jorge Nocedal. Exact and inexact subsampled Newton methods for
+optimization. IMA Journal of Numerical Analysis, 39(2), 2018.
+[19] A. Borodin. Determinantal point processes. In Oxford handbook of random matrix theory, pages 231–249.
+Oxford University Press, 2011.
+20
+[20] A. Borodin and G. Olshanski. Distributions on partitions, point processes, and the hypergeometric kernel.
+Communications in Mathematical Physics, 211(2):335–358, 2000.
+[21] Leon Bottou and Olivier Bousquet. The tradeoffs of large scale learning. In Proceedings of the 20th International
+Conference on Neural Information Processing Systems, NIPS’07, pages 161–168, USA, 2007. Curran Associates
+Inc.
+[22] C. Boutsidis, M. W. Mahoney, and P. Drineas. Unsupervised feature selection for principal components analysis.
+In Proceedings of the 14th Annual ACM SIGKDD Conference, pages 61–69, 2008.
+[23] C. Boutsidis, M. W. Mahoney, and P. Drineas. An improved approximation algorithm for the column subset
+selection problem. In Proceedings of the 20th Annual ACM-SIAM Symposium on Discrete Algorithms, pages
+968–977, 2009.
+[24] C. Boutsidis, M.W. Mahoney, and P. Drineas. Unsupervised feature selection for the k-means clustering problem.
+In Annual Advances in Neural Information Processing Systems 22: Proceedings of the 2009 Conference, 2009.
+[25] Christos Boutsidis, Petros Drineas, and Malik Magdon-Ismail. Near optimal column-based matrix reconstruction.
+In 2011 IEEE 52nd Annual Symposium on Foundations of Computer Science, pages 305–314, Oct 2011.
+[26] Tatiana Brailovskaya and Ramon van Handel. Universality and sharp matrix concentration inequalities. arXiv
+preprint arXiv:2201.05142, 2022.
+[27] Vladimir Braverman, Petros Drineas, Cameron Musco, Christopher Musco, Jalaj Upadhyay, David P Woodruff,
+and Samson Zhou. Near optimal linear algebra in the online and sliding window models. In 2020 IEEE 61st
+Annual Symposium on Foundations of Computer Science (FOCS), pages 517–528. IEEE, 2020.
+[28] David Burt, Carl Edward Rasmussen, and Mark Van Der Wilk. Rates of convergence for sparse variational
+Gaussian process regression. In Proceedings of the 36th International Conference on Machine Learning, pages
+862–871, 2019.
+[29] Daniele Calandriello, Luigi Carratino, Alessandro Lazaric, Michal Valko, and Lorenzo Rosasco. Gaussian
+process optimization with adaptive sketching: Scalable and no regret. In Conference on Learning Theory, 2019.
+[30] Daniele Calandriello, Michał Derezi´nski, and Michal Valko. Sampling from a k-DPP without looking at all
+items. Advances in Neural Information Processing Systems, 33:6889–6899, 2020.
+[31] Cheng Chen, Yi Li, and Yiming Sun. Online active regression. In International Conference on Machine Learning,
+pages 3320–3335. PMLR, 2022.
+[32] Xue Chen and Michał Derezi´nski. Query complexity of least absolute deviation regression via robust uniform
+convergence. In Conference on Learning Theory, pages 1144–1179. PMLR, 2021.
+[33] Xue Chen and Eric Price. Active regression via linear-sample sparsification. In Proceedings of the 32nd
+Conference on Learning Theory, pages 663–695, 2019.
+[34] Shabarish Chenakkod, Michał Derezi´nski, Xiaoyu Dong, and Mark Rudelson. Optimal embedding dimension
+for sparse subspace embeddings. Symposium on Theory of Computing (STOC), 2024.
+[35] Jocelyn T Chi and Ilse CF Ipsen. Randomized least squares regression: Combining model-and algorithm-induced
+uncertainties. Tehnical Report, 1:34, 2018.
+[36] Younghyun Cho, James W Demmel, Michał Derezi´nski, Haoyun Li, Hengrui Luo, Michael W Mahoney, and
+Riley J Murray. Surrogate-based autotuning for randomized sketching algorithms in regression problems. arXiv
+preprint arXiv:2308.15720, 2023.
+[37] Kenneth L. Clarkson and David P. Woodruff. Low-rank approximation and regression in input sparsity time. J.
+ACM, 63(6):54:1–54:45, January 2017.
+21
+[38] Jon Cockayne, Ilse CF Ipsen, Chris J Oates, and Tim W Reid. Probabilistic iterative methods for linear systems.
+The Journal of Machine Learning Research, 22(1):10505–10538, 2021.
+[39] Michael B Cohen, Jelani Nelson, and David P Woodruff. Optimal approximate matrix product in terms of
+stable rank. In 43rd International Colloquium on Automata, Languages, and Programming (ICALP 2016).
+Schloss-Dagstuhl-Leibniz Zentrum für Informatik, 2016.
+[40] J. Demmel, J. Dongarra, J. Langou, J. Langou, P. Luszczek, and M. W. Mahoney. Prospectus for the Next
+LAPACK and ScaLAPACK Libraries: Basic ALgebra LIbraries for Sustainable Technology with Interdisciplinary
+Collaboration (BALLISTIC). Technical Report LAWNs (LAPACK Working Notes), lawn297, ICL-UT-20-07,
+2020.
+[41] Michał Derezi´nski. Fast determinantal point processes via distortion-free intermediate sampling. In Proceedings
+of the 32nd Conference on Learning Theory, pages 1029–1049, 2019.
+[42] Michał Derezi´nski. Stochastic variance-reduced Newton: Accelerating finite-sum minimization with large
+batches. arXiv preprint arXiv:2206.02702, 2022.
+[43] Michał Derezi´nski. Algorithmic gaussianization through sketching: Converting data into sub-Gaussian random
+designs. In The Thirty Sixth Annual Conference on Learning Theory, pages 3137–3172. PMLR, 2023.
+[44] Michał Derezi´nski, Burak Bartan, Mert Pilanci, and Michael W Mahoney. Debiasing distributed second order
+optimization with surrogate sketching and scaled regularization. Advances in Neural Information Processing
+Systems, 33:6684–6695, 2020.
+[45] Michał Derezi´nski, Daniele Calandriello, and Michal Valko. Exact sampling of determinantal point processes
+with sublinear time preprocessing. In Advances in Neural Information Processing Systems, pages 11542–11554,
+2019.
+[46] Michał Derezi´nski, Kenneth L. Clarkson, MichaelW. Mahoney, and Manfred K.Warmuth. Minimax experimental
+design: Bridging the gap between statistical and worst-case approaches to least squares regression. In Proceedings
+of the Thirty-Second Conference on Learning Theory, pages 1050–1069, 2019.
+[47] Michał Derezi´nski, Rajiv Khanna, and Michael W Mahoney. Improved guarantees and a multiple-descent curve
+for the column subset selection problem and the Nyström method. In Advances in Neural Information Processing
+Systems, volume 33, pages 4953–4964, 2020.
+[48] Michał Derezi´nski, Jonathan Lacotte, Mert Pilanci, and Michael W Mahoney. Newton-LESS: Sparsification
+without trade-offs for the sketched Newton update. Advances in Neural Information Processing Systems,
+34:2835–2847, 2021.
+[49] Michał Derezi´nski, Daniel LeJeune, Deanna Needell, and Elizaveta Rebrova. Fine-grained analysis and faster
+algorithms for iteratively solving linear systems. arXiv preprint arXiv:2405.05818, 2024.
+[50] Michał Derezi´nski, Feynman T Liang, Zhenyu Liao, and Michael W Mahoney. Precise expressions for random
+projections: Low-rank approximation and randomized Newton. Advances in Neural Information Processing
+Systems, 33, 2020.
+[51] Michał Derezi´nski, Feynman T Liang, and Michael W Mahoney. Exact expressions for double descent and
+implicit regularization via surrogate random design. Advances in neural information processing systems,
+33:5152–5164, 2020.
+[52] Michał Derezi´nski, Zhenyu Liao, Edgar Dobriban, and Michael Mahoney. Sparse sketches with small inversion
+bias. In Conference on Learning Theory, pages 1467–1510. PMLR, 2021.
+[53] Michał Derezi´nski and Michael W Mahoney. Distributed estimation of the inverse Hessian by determinantal
+averaging. In Advances in Neural Information Processing Systems 32, pages 11401–11411. 2019.
+22
+[54] Michał Derezi´nski and Michael W Mahoney. Determinantal point processes in randomized numerical linear
+algebra. Notices of the American Mathematical Society, 68(1):34–45, 2021.
+[55] Michał Derezi´nski, Christopher Musco, and Jiaming Yang. Faster linear systems and matrix norm approximation
+via multi-level sketched preconditioning. arXiv preprint arXiv:2405.05865, 2024.
+[56] Michał Derezi´nski and Elizaveta Rebrova. Sharp analysis of sketch-and-project methods via a connection to
+randomized singular value decomposition. SIAM Journal on Mathematics of Data Science, 6(1):127–153, 2024.
+[57] Michał Derezi´nski and Manfred K. Warmuth. Unbiased estimates for linear regression via volume sampling. In
+Advances in Neural Information Processing Systems 30, pages 3087–3096, 2017.
+[58] Michał Derezi´nski and Manfred K. Warmuth. Reverse iterative volume sampling for linear regression. Journal
+of Machine Learning Research, 19(23):1–39, 2018.
+[59] Michał Derezi´nski, Manfred K. Warmuth, and Daniel Hsu. Leveraged volume sampling for linear regression. In
+Advances in Neural Information Processing Systems 31, pages 2510–2519. 2018.
+[60] Michał Derezi´nski and Jiaming Yang. Solving linear systems faster than via preconditioning. In Proceedings of
+the Symposium on Theory of Computing (STOC), 2024.
+[61] Amit Deshpande, Luis Rademacher, Santosh Vempala, and Grant Wang. Matrix approximation and projective
+clustering via volume sampling. In Proceedings of the Seventeenth Annual ACM-SIAM Symposium on Discrete
+Algorithm, pages 1117–1126, January 2006.
+[62] Gregory Dexter, Christos Boutsikas, Linkai Ma, Ilse CF Ipsen, and Petros Drineas. Stochastic rounding implicitly
+regularizes tall-and-thin matrices. arXiv preprint arXiv:2403.12278, 2024.
+[63] Edgar Dobriban and Sifan Liu. Asymptotics for sketching in least squares regression. Advances in Neural
+Information Processing Systems, 32, 2019.
+[64] Edgar Dobriban and Yue Sheng. Wonder: Weighted one-shot distributed ridge regression in high dimensions. J.
+Mach. Learn. Res., 21(66):1–52, 2020.
+[65] P. Drineas, I. Ipsen, E. Kontopoulou, and M. Magdon-Ismail. Structural convergence results for approximations of
+dominant subspaces from block Krylov spaces. SIAM Journal on Matrix Analysis and Applications, 39:567–586,
+2018.
+[66] P. Drineas, R. Kannan, and M. W. Mahoney. Fast Monte Carlo algorithms for matrices I: Approximating matrix
+multiplication. SIAM Journal on Computing, 36:132–157, 2006.
+[67] P. Drineas and M. W. Mahoney. RandNLA: Randomized numerical linear algebra. Communications of the ACM,
+59:80–90, 2016.
+[68] P. Drineas and M. W. Mahoney. Lectures on randomized numerical linear algebra. In The Mathematics of Data,
+IAS/Park City Mathematics Series, pages 1–48. AMS/IAS/SIAM, 2018.
+[69] P. Drineas, M. W. Mahoney, S. Muthukrishnan, and T. Sarlós. Faster least squares approximation. Numerische
+Mathematik, 117(2):219–249, 2010.
+[70] P. Drineas and M.W. Mahoney. Effective resistances, statistical leverage, and applications to linear equation
+solving. Technical report. Preprint: arXiv:1005.3097 (2010).
+[71] Petros Drineas, Malik Magdon-Ismail, Michael W. Mahoney, and David P. Woodruff. Fast approximation of
+matrix coherence and statistical leverage. J. Mach. Learn. Res., 13(1):3475–3506, 2012.
+[72] Petros Drineas, Michael W Mahoney, and S Muthukrishnan. Sampling algorithms for ℓ2 regression and
+applications. In Proceedings of the seventeenth annual ACM-SIAM symposium on Discrete algorithm, pages
+1127–1136, 2006.
+23
+[73] Petros Drineas, Michael W. Mahoney, and S. Muthukrishnan. Relative-error CUR matrix decompositions. SIAM
+J. Matrix Anal. Appl., 30(2):844–881, 2008.
+[74] David Durfee, Kevin A Lai, and Saurabh Sawlani. L1 regression using Lewis weights preconditioning and
+stochastic gradient descent. In Conference On Learning Theory, pages 1626–1656. PMLR, 2018.
+[75] Murat A Erdogdu and Andrea Montanari. Convergence rates of sub-sampled Newton methods. Advances in
+Neural Information Processing Systems, 28:3052–3060, 2015.
+[76] N Benjamin Erichson, Krithika Manohar, Steven L Brunton, and J Nathan Kutz. Randomized CP tensor
+decomposition. Machine Learning: Science and Technology, 1(2):025012, 2020.
+[77] Zachary Frangella, Pratik Rathore, Shipu Zhao, and Madeleine Udell. Promise: Preconditioned stochastic
+optimization methods by incorporating scalable curvature estimates. arXiv preprint arXiv:2309.02014, 2023.
+[78] Zachary Frangella, Joel A Tropp, and Madeleine Udell. Randomized Nystrom preconditioning. arXiv preprint
+arXiv:2110.02820, 2021.
+[79] Aarshvi Gajjar, Wai Ming Tai, Xingyu Xu, Chinmay Hegde, Christopher Musco, and Yi Li. Agnostic active
+learning of single index models with linear sample complexity. Proceedings of the 37th Annual Conference on
+Learning Theory (COLT), 2024.
+[80] Sachin Garg, Kevin Tan, and Michał Derezi´nski. Distributed least squares in small space via sketching and bias
+reduction. arXiv preprint arXiv:2405.05343, 2024.
+[81] Guillaume Gautier, Rémi Bardenet, and Michal Valko. DPPy: Sampling determinantal point processes with
+Python. 2018.
+[82] A. Gholami, S. Kim, Z. Dong, Z. Yao, M. W. Mahoney, and K. Keutzer. A survey of quantization methods for
+efficient neural network inference. Technical Report Preprint: arXiv:2103.13630, 2021.
+[83] A. Gholami, Z. Yao, S. Kim, C. Hooper, M. W. Mahoney, and K. Keutzer. AI and memory wall. Technical
+Report Preprint: arXiv:2403.14123, 2024.
+[84] Jennifer Gillenwater, Alex Kulesza, Zelda Mariet, and Sergei Vassilvtiskii. A tree-based method for fast repeated
+sampling of determinantal point processes. In Proceedings of the 36th International Conference on Machine
+Learning, pages 2260–2268, 2019.
+[85] A. Gittens, J. Kottalam, J. Yang, M. F. Ringenburg, J. Chhugani, E. Racah, M. Singh, Y. Yao, C. Fischer,
+O. Ruebel, B. Bowen, N. G. Lewis, M.W. Mahoney, V. Krishnamurthy, and Prabhat. A multi-platform evaluation
+of the randomized CX low-rank matrix factorization in Spark. In Proc. 5th International Workshop on Parallel
+and Distributed Computing for Large Scale Machine Learning and Big Data Analytics, at IPDPS, 2016.
+[86] Alex Gittens and Michael W. Mahoney. Revisiting the Nyström method for improved large-scale machine
+learning. J. Mach. Learn. Res., 17(1):3977–4041, 2016.
+[87] Alon Gonen, Francesco Orabona, and Shai Shalev-Shwartz. Solving ridge regression using sketched preconditioned
+SVRG. In International conference on machine learning, pages 1397–1405. PMLR, 2016.
+[88] Robert Gower, Filip Hanzely, Peter Richtárik, and Sebastian U Stich. Accelerated stochastic matrix inversion:
+general theory and speeding up BFGS rules for faster second-order optimization. Advances in Neural Information
+Processing Systems, 31, 2018.
+[89] Robert Gower, Dmitry Kovalev, Felix Lieder, and Peter Richtárik. RSN: Randomized subspace newton. Advances
+in Neural Information Processing Systems, 32, 2019.
+24
+[90] Robert Gower, Nicolas Le Roux, and Francis Bach. Tracking the gradients using the Hessian: A new look at
+variance reducing stochastic methods. In International Conference on Artificial Intelligence and Statistics, pages
+707–715. PMLR, 2018.
+[91] Robert M Gower and Peter Richtárik. Randomized iterative methods for linear systems. SIAM Journal on Matrix
+Analysis and Applications, 36(4):1660–1690, 2015.
+[92] Vipul Gupta, Avishek Ghosh, Michał Derezi´nski, Rajiv Khanna, Kannan Ramchandran, and MichaelWMahoney.
+LocalNewton: Reducing communication rounds for distributed learning. In Uncertainty in Artificial Intelligence,
+pages 632–642. PMLR, 2021.
+[93] Venkatesan Guruswami and Ali K. Sinop. Optimal column-based low-rank matrix reconstruction. In Proceedings
+of the Twenty-third Annual ACM-SIAM Symposium on Discrete Algorithms, pages 1207–1214, 2012.
+[94] Nathan Halko, Per-Gunnar Martinsson, and Joel A Tropp. Finding structure with randomness: Probabilistic
+algorithms for constructing approximate matrix decompositions. SIAM review, 53(2):217–288, 2011.
+[95] Filip Hanzely, Nikita Doikov, Yurii Nesterov, and Peter Richtarik. Stochastic subspace cubic Newton method. In
+International Conference on Machine Learning, pages 4027–4038. PMLR, 2020.
+[96] Filip Hanzely, Konstantin Mishchenko, and Peter Richtárik. SEGA: Variance reduction via gradient sketching.
+Advances in Neural Information Processing Systems, 31, 2018.
+[97] L. Hodgkinson and M. W. Mahoney. Multiplicative noise and heavy tails in stochastic optimization. Technical
+Report Preprint: arXiv:2006.06293, 2020.
+[98] J Ben Hough, Manjunath Krishnapur, Yuval Peres, and Bálint Virág. Determinantal processes and independence.
+Probability surveys, 3:206–229, 2006.
+[99] Piotr Indyk, Ali Vakilian, and Yang Yuan. Learning-based low-rank approximations. Advances in Neural
+Information Processing Systems, 32, 2019.
+[100] Piotr Indyk, Tal Wagner, and David Woodruff. Few-shot data-driven algorithms for low rank approximation.
+Advances in Neural Information Processing Systems, 34:10678–10690, 2021.
+[101] Arun Jambulapati, James R Lee, Yang P Liu, and Aaron Sidford. Sparsifying generalized linear models. arXiv
+preprint arXiv:2311.18145, 2023.
+[102] Ruhui Jin, Tamara G Kolda, and Rachel Ward. Faster Johnson–Lindenstrauss transforms via Kronecker products.
+Information and Inference: A Journal of the IMA, 10(4):1533–1562, 2021.
+[103] M. S. Kaczmarz. Angenaherte auflosung von systemen linearer gleichungen. Bulletin International de l’Academie
+Polonaise des Sciences et des Lettres, 35:355–357, 1937.
+[104] R. Kannan and S. Vempala. Randomized algorithms in numerical linear algebra. Acta Mathematica, 26:95–135,
+2017.
+[105] I. Koutis, G. L. Miller, and R. Peng. A fast solver for a class of linear systems. Communications of the ACM,
+55(10):99–107, 2012.
+[106] Dmitry Kovalev, Konstantin Mishchenko, and Peter Richtárik. Stochastic Newton and cubic Newton methods
+with simple local linear-quadratic rates. arXiv preprint arXiv:1912.01597, 2019.
+[107] Alex Kulesza and Ben Taskar. k-DPPs: Fixed-Size Determinantal Point Processes. In Proceedings of the 28th
+International Conference on Machine Learning, pages 1193–1200, June 2011.
+[108] Alex Kulesza and Ben Taskar. Determinantal Point Processes for Machine Learning. Now Publishers Inc.,
+Hanover, MA, USA, 2012.
+25
+[109] Jonathan Lacotte, Sifan Liu, Edgar Dobriban, and Mert Pilanci. Optimal iterative sketching methods with the
+subsampled randomized Hadamard transform. Advances in Neural Information Processing Systems, 33:9725–
+9735, 2020.
+[110] Jonathan Lacotte and Mert Pilanci. Adaptive and oblivious randomized subspace methods for high-dimensional
+optimization: Sharp analysis and lower bounds. IEEE Transactions on Information Theory, 68(5):3281–3303,
+2022.
+[111] Yin Tat Lee and Aaron Sidford. Efficient accelerated coordinate descent methods and faster algorithms for
+solving linear systems. In 2013 ieee 54th annual symposium on foundations of computer science, pages 147–156.
+IEEE, 2013.
+[112] Daniel LeJeune, Hamid Javadi, and Richard Baraniuk. The implicit regularization of ordinary least squares
+ensembles. In International Conference on Artificial Intelligence and Statistics, pages 3525–3535. PMLR, 2020.
+[113] Daniel LeJeune, Pratik Patil, Hamid Javadi, Richard G Baraniuk, and Ryan J Tibshirani. Asymptotics of the
+sketched pseudoinverse. SIAM Journal on Mathematics of Data Science, 6(1):199–225, 2024.
+[114] Dennis Leventhal and Adrian S Lewis. Randomized methods for linear constraints: convergence rates and
+conditioning. Mathematics of Operations Research, 35(3):641–654, 2010.
+[115] Xingguo Li, Jarvis Haupt, and David Woodruff. Near optimal sketching of low-rank tensor regression. Advances
+in Neural Information Processing Systems, 30, 2017.
+[116] Z. Liao, R. Couillet, and M. W. Mahoney. Sparse quantized spectral clustering. Technical Report Preprint:
+arXiv:2010.01376, 2020.
+[117] Yanli Liu, Fei Feng, and Wotao Yin. Acceleration of SVRG and Katyusha X by inexact preconditioning. In
+International Conference on Machine Learning, pages 4003–4012. PMLR, 2019.
+[118] Miles Lopes, Shusen Wang, and Michael Mahoney. Error estimation for randomized least-squares algorithms via
+the bootstrap. In International Conference on Machine Learning, pages 3217–3226. PMLR, 2018.
+[119] Miles E Lopes, N Benjamin Erichson, and Michael W Mahoney. Bootstrapping the operator norm in high
+dimensions: Error estimation for covariance matrices and sketching. Bernoulli, 29(1):428–450, 2023.
+[120] Miles E Lopes, Shusen Wang, and Michael W Mahoney. A bootstrap method for error estimation in randomized
+matrix multiplication. The Journal of Machine Learning Research, 20(1):1434–1473, 2019.
+[121] P. Ma, M. W. Mahoney, and B. Yu. A statistical perspective on algorithmic leveraging. Journal of Machine
+Learning Research, 16:861–911, 2015.
+[122] Ping Ma, Yongkai Chen, Xinlian Zhang, Xin Xing, Jingyi Ma, and Michael W Mahoney. Asymptotic analysis
+of sampling estimators for randomized numerical linear algebra algorithms. The Journal of Machine Learning
+Research, 23(1):7970–8014, 2022.
+[123] Odile Macchi. The coincidence approach to stochastic point processes. Advances in Applied Probability,
+7(1):83–122, 1975.
+[124] M. W. Mahoney. Randomized algorithms for matrices and data. Foundations and Trends in Machine Learning.
+NOW Publishers, Boston, 2011.
+[125] M. W. Mahoney. Approximate computation and implicit regularization for very large-scale data analysis. In
+Proceedings of the 31st ACM Symposium on Principles of Database Systems, pages 143–154, 2012.
+[126] M. W. Mahoney. Lecture notes on randomized linear algebra. Technical Report Preprint: arXiv:1608.04481,
+2016.
+26
+[127] M. W. Mahoney. Lecture notes on spectral graph methods. Technical Report Preprint: arXiv:1608.04845, 2016.
+[128] M. W. Mahoney and P. Drineas. Structural properties underlying high-quality randomized numerical linear
+algebra algorithms. In Handbook of Big Data, pages 137–154. CRC Press, 2016.
+[129] M. W. Mahoney and L. Orecchia. Implementing regularization implicitly via approximate eigenvector computation.
+In Proceedings of the 28th International Conference on Machine Learning, pages 121–128, 2011.
+[130] C. H. Martin and M. W. Mahoney. Implicit self-regularization in deep neural networks: Evidence from random
+matrix theory and implications for learning. Technical Report Preprint: arXiv:1810.01075, 2018.
+[131] P.-G. Martinsson. Randomized methods for matrix computations. In M. W. Mahoney, J. C. Duchi, and A. C.
+Gilbert, editors, The Mathematics of Data, IAS/Park City Mathematics Series, pages 187–230. AMS/IAS/SIAM,
+2018.
+[132] Per-Gunnar Martinsson and Joel A Tropp. Randomized numerical linear algebra: Foundations and algorithms.
+Acta Numerica, 29:403–572, 2020.
+[133] J. Matousek. On variants of the Johnson–Lindenstrauss lemma. Random Structures and Algorithms, 33(2):142–
+156, 2008.
+[134] X. Meng, M. A. Saunders, and M. W. Mahoney. LSRN: A parallel iterative solver for strongly over- or
+under-determined systems. SIAM Journal on Scientific Computing, 36(2):C95–C118, 2014.
+[135] Xiangrui Meng and Michael W. Mahoney. Low-distortion subspace embeddings in input-sparsity time and
+applications to robust linear regression. In Proceedings of the Symposium on Theory of Computing, STOC ’13,
+pages 91–100, 2013.
+[136] Raphael A Meyer, Cameron Musco, Christopher Musco, and David P Woodruff. Hutch++: Optimal stochastic
+trace estimation. In Symposium on Simplicity in Algorithms (SOSA), pages 142–155. SIAM, 2021.
+[137] Aryan Mokhtari, Mark Eisen, and Alejandro Ribeiro. IQN: An incremental quasi-Newton method with local
+superlinear convergence rate. SIAM Journal on Optimization, 28(2):1670–1698, 2018.
+[138] R. Murray, J. Demmel, M. W. Mahoney, N. B. Erichson, M. Melnichenko, O. A. Malik, L. Grigori, P. Luszczek,
+M. Derezi´nski, M. E. Lopes, T. Liang, H. Luo, and J. Dongarra. Randomized Numerical Linear Algebra – a
+perspective on the field with an eye to software. Technical Report Preprint: arXiv:2302.11474v2, 2023.
+[139] Cameron Musco and Christopher Musco. Randomized block krylov methods for stronger and faster approximate
+singular value decomposition. Advances in neural information processing systems, 28, 2015.
+[140] Cameron Musco and Christopher Musco. Recursive sampling for the Nystrom method. Advances in neural
+information processing systems, 30, 2017.
+[141] Cameron Musco, Christopher Musco, David P Woodruff, and Taisuke Yasuda. Active linear regression for lp
+norms and beyond. In 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS), pages
+744–753. IEEE, 2022.
+[142] Cameron Musco and David PWoodruff. Sublinear time low-rank approximation of positive semidefinite matrices.
+In 2017 IEEE 58th Annual Symposium on Foundations of Computer Science (FOCS), pages 672–683. IEEE,
+2017.
+[143] Mojmir Mutny, Michał Derezi´nski, and Andreas Krause. Convergence analysis of block coordinate algorithms
+with determinantal sampling. In International Conference on Artificial Intelligence and Statistics, pages 3110–
+3120, 2020.
+[144] Sen Na, Michał Derezi´nski, and Michael W Mahoney. Hessian averaging in stochastic Newton methods achieves
+superlinear convergence. Mathematical Programming, pages 1–48, 2022.
+27
+[145] Deanna Needell and Joel A Tropp. Paved with good intentions: analysis of a randomized block Kaczmarz
+method. Linear Algebra and its Applications, 441:199–221, 2014.
+[146] Deanna Needell and Rachel Ward. Two-subspace projection method for coherent overdetermined systems.
+Journal of Fourier Analysis and Applications, 19(2):256–269, 2013.
+[147] Deanna Needell, Rachel Ward, and Nati Srebro. Stochastic gradient descent, weighted sampling, and the
+randomized Kaczmarz algorithm. Advances in neural information processing systems, 27, 2014.
+[148] Jelani Nelson and Huy L. Nguyên. OSNAP: Faster numerical linear algebra algorithms via sparser subspace
+embeddings. In Proceedings of the Symposium on Foundations of Computer Science, FOCS ’13, pages 117–126,
+2013.
+[149] B. Neyshabur. Implicit regularization in deep learning. Technical report, 2017. Preprint: arXiv:1709.01953.
+[150] Aditya Parulekar, Advait Parulekar, and Eric Price. L1 regression with Lewis weights subsampling. Approximation,
+Randomization, and Combinatorial Optimization. Algorithms and Techniques, 2021.
+[151] M. Pilanci and M. J. Wainwright. Iterative Hessian sketch: Fast and accurate solution approximation for
+constrained least-squares. Journal of Machine Learning Research, 17(53):1–38, 2016.
+[152] Mert Pilanci and Martin J Wainwright. Newton sketch: A near linear-time optimization algorithm with linearquadratic
+convergence. SIAM Journal on Optimization, 27(1):205–245, 2017.
+[153] G. Raskutti and M. W. Mahoney. A statistical perspective on randomized sketching for ordinary least-squares.
+Journal of Machine Learning Research, 17(214):1–31, 2016.
+[154] Elizaveta Rebrova and Deanna Needell. On block Gaussian sketching for the Kaczmarz method. Numerical
+Algorithms, 86:443–473, 2021.
+[155] Anton Rodomanov and Dmitry Kropotov. A randomized coordinate descent method with volume sampling.
+SIAM Journal on Optimization, 30(3):1878–1904, 2020.
+[156] V. Rokhlin, A. Szlam, and M. Tygert. A randomized algorithm for principal component analysis. SIAM Journal
+on Matrix Analysis and Applications, 31(3):1100–1124, 2009.
+[157] Vladimir Rokhlin and Mark Tygert. A fast randomized algorithm for overdetermined linear least-squares
+regression. Proceedings of the National Academy of Sciences, 105(36):13212–13217, 2008.
+[158] F. Roosta-Khorasani and U. Ascher. Improved bounds on sample size for implicit matrix trace estimators. J.
+Foundations of Computational Mathematics (FOCM), 15(5):1187–1212, 2015.
+[159] Farbod Roosta-Khorasani and MichaelWMahoney. Sub-sampled Newton methods. Mathematical Programming,
+174:293–326, 2019.
+[160] Daniel Rothchild, Ashwinee Panda, Enayat Ullah, Nikita Ivkin, Ion Stoica, Vladimir Braverman, Joseph
+Gonzalez, and Raman Arora. Fetchsgd: Communication-efficient federated learning with sketching. In
+International Conference on Machine Learning, pages 8253–8265. PMLR, 2020.
+[161] Mark Rudelson and Roman Vershynin. Hanson-Wright inequality and sub-gaussian concentration. Electronic
+Communications in Probability, 18, 2013.
+[162] Alessandro Rudi, Daniele Calandriello, Luigi Carratino, and Lorenzo Rosasco. On fast leverage score sampling
+and optimal learning. In Advances in Neural Information Processing Systems 31, pages 5672–5682. 2018.
+[163] Alessandro Rudi, Luigi Carratino, and Lorenzo Rosasco. Falkon: An optimal large scale kernel method. Advances
+in neural information processing systems, 30, 2017.
+28
+[164] Tamas Sarlos. Improved approximation algorithms for large matrices via random projections. In Proceedings of
+the Symposium on Foundations of Computer Science, FOCS ’06, pages 143–152, 2006.
+[165] G.W. Stewart. On the perturbation of pseudo-inverses, projections and linear least squares problems. SIAM
+Review, 19:634–662, 1977.
+[166] Thomas Strohmer and Roman Vershynin. A randomized Kaczmarz algorithm with exponential convergence.
+Journal of Fourier Analysis and Applications, 15(2):262–278, 2009.
+[167] J. A. Tropp. An introduction to matrix concentration inequalities. Foundations and Trends in Machine Learning.
+NOW Publishers, Boston, 2015.
+[168] S. Wang, A. Gittens, and M. W. Mahoney. Sketched ridge regression: Optimization perspective, statistical
+perspective, and model averaging. Journal of Machine Learning Research, 18(218):1–50, 2018.
+[169] Yining Wang, Hsiao-Yu Tung, Alexander J Smola, and Anima Anandkumar. Fast and guaranteed tensor
+decomposition via sketching. Advances in neural information processing systems, 28, 2015.
+[170] Christopher K. I. Williams and Matthias Seeger. Using the Nyström method to speed up kernel machines. In
+Advances in Neural Information Processing Systems 13, pages 682–688. 2001.
+[171] David P Woodruff. Sketching as a tool for numerical linear algebra. Foundations and Trends® in Theoretical
+Computer Science, 10(1–2):1–157, 2014.
+[172] P. Xu, J. Yang, F. Roosta-Khorasani, C. Re, and M.W. Mahoney. Sub-sampled Newton methods with non-uniform
+sampling. Technical Report Preprint: arXiv:1607.00559, 2016.
+[173] Fan Yang, Sifan Liu, Edgar Dobriban, and David P Woodruff. How to reduce dimension with PCA and random
+projections? arXiv preprint arXiv:2005.00511, 2020.
+[174] J. Yang, X. Meng, and M. W. Mahoney. Implementing randomized matrix algorithms in parallel and distributed
+environments. Proceedings of the IEEE, 104(1):58–92, 2016.
+[175] Jiyan Yang, Yin-Lam Chow, Christopher Ré, and Michael W Mahoney. Weighted SGD for lp regression with
+randomized preconditioning. The Journal of Machine Learning Research, 18(1):7811–7853, 2017.
+[176] Zhewei Yao, Amir Gholami, Kurt Keutzer, and Michael W Mahoney. PyHessian: Neural networks through the
+lens of the Hessian. In 2020 IEEE international conference on big data (Big data), pages 581–590. IEEE, 2020.
+[177] Zhewei Yao, Amir Gholami, Sheng Shen, Mustafa Mustafa, Kurt Keutzer, and MichaelWMahoney. AdaHessian:
+An adaptive second order optimizer for machine learning. In proceedings of the AAAI conference on artificial
+intelligence, volume 35, 2021.
+[178] Rui Yuan, Alessandro Lazaric, and RobertMGower. Sketched Newton–Raphson. SIAM Journal on Optimization,
+32(3):1555–1583, 2022.
+29

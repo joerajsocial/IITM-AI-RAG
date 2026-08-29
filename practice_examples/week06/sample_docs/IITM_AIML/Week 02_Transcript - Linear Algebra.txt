@@ -1,0 +1,450 @@
+Document 1: Week 2_Transcript - Linear Algebra
+Page | 1
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+Video 1: Vectors, Matrices and Basic Operations
+Let us get start with the basics of mathematical topics.
+So here, first we will look into the basics of linear algebra, and later we look into probability and statistics. For the context of machine learning and deep learning, a prominent mathematical topic required for us is linear algebra and probability and statistics.
+If you look into linear algebra and probability and statistics, there is a whole lot of a full-fledged course available, and you can look into the internet to explore more if anybody is interested in further studying linear algebra, probability, and statistics. However, in this course, we will cover only those topics necessary to understand the concepts of machine learning and deep learning. Only those aspects will be touched upon.
+With this, we will start with the basics of linear algebra. Linear algebra is mostly about vectors and matrices. We will look into some basic operations at the beginning. Why are these vectors important for us? In the context of data science or machine learning, we all deal with data. When dealing with data, we extract features from it. The set of features extracted from the data is referred to as vectors or feature vectors.
+Suppose we have d number of features extracted from the data; the collection of all these d features is called a feature vector, which contains d elements. Typically, a vector is represented using a small alphabet with a bold symbol, which is a conventional way of writing vectors. Within a round bracket, we represent a collection of all those d elements. This entire feature vector represents one data sample. Similarly, we may have n number of samples in the dataset.
+When we talk about feature vectors, a vector is usually a specific case of a matrix. A matrix consists of both rows and columns, making it a two-dimensional representation. It contains n rows and d columns. A vector, in contrast, is a specific case of a matrix of size d × 1, meaning it has one column and d rows.
+A typical representation of a vector, as a special case of a matrix, consists of one column with d rows. Each element in that column represents a feature value. Typically, this vector is represented as R^d, where R indicates the set of real numbers, and d represents the number of elements in that set. In this context, each vector is considered a point in a d-dimensional space.
+Geometrically, a feature vector can be considered as a directed line from the origin to a point corresponding to that vector. For example, in a two-dimensional space, represented as R^2, the vector elements are (x1, x2). By convention, vectors are column vectors by default, so a row vector with a T (transpose) symbol indicates conversion to a column vector.
+Page | 2
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+In a two-dimensional coordinate space, one axis represents x1, and the other represents x2. The vector x is a point in this space, and geometrically, it is represented as a directed line from the origin to that point.
+For illustration, consider a vector x = (1,2) in a two-dimensional space. The x1 coordinate is 1, and the x2 coordinate is 2, representing a point in the space. Similarly, for x = (3,2), x1 is 3, and x2 is 2. Another example, x = (-2,-1), represents a vector in the negative quadrant. These examples illustrate how vectors are represented geometrically.
+Vectors are important in machine learning and deep learning because all data is represented in this form. For example, if we have data about a person, where each individual is described by two attributes—height and weight—then each person’s data can be represented as a feature vector x = (height, weight).
+On the left side, we see multiple rows, where each row represents the height and weight of a person. This could be data from 20 individuals. In a two-dimensional space, these values appear as points where the x axis represents height and the y axis represents weight. Each dot in the graph represents a vector in that space.
+Not all datasets have only two parameters. For example, the Iris Flower Dataset contains four attributes: sepal length, sepal width, petal length, and petal width. Each row in the dataset represents a flower and contains four elements, forming a four-dimensional vector. Similarly, in the handwritten digit dataset, each image is 28 × 28 pixels, meaning each image consists of 784 pixel values. Each image is then represented as a 784-dimensional vector.
+Another example is the Wine Quality Dataset, which contains 12 parameters defining wine quality. Each row in the dataset represents a wine sample, where each parameter is a feature. The dataset forms a 12-dimensional space, where each wine sample is represented as a point in that space. These examples illustrate the importance of feature vectors in machine learning.
+In machine learning and deep learning, all operations are performed on these feature vectors. Many fundamental operations involve vectors, and understanding these operations is crucial.
+One of the common operations is vector addition. Mathematically, vector addition involves adding two vectors of the same length, where corresponding elements are summed. If xm and xn are two vectors of d elements, their sum results in a new vector y with d elements. The sum vector is computed element-wise, such as:
+y1 = xm1 + xn1
+y2 = xm2 + xn2
+... up to yd = xmd + xnd
+Page | 3
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+For example, if xm = (1,2) and xn = (3,2), then their sum is y = (4,4).
+Geometrically, vector addition can be visualized in a coordinate system where the vectors form a parallelogram. The resultant vector represents the sum in that space.
+Another fundamental operation is vector subtraction, which involves element-wise subtraction of two vectors, resulting in a difference vector. The mathematical operation is:
+y1 = xm1 - xn1
+y2 = xm2 - xn2
+... up to yd = xmd - xnd
+For example, if xm = (1,2) and xn = (3,2), then their difference is y = (-2,0).
+Vector subtraction can also be visualized geometrically as shifting one vector in the opposite direction before performing addition.
+Another common operation is scalar multiplication, which involves multiplying every element of a vector by a scalar value a. If a vector x has d elements, and a is a scalar, the resultant vector y is computed as:
+y1 = a × x1
+y2 = a × x2
+... up to yd = a × xd
+For example, if x = (1,2) and a = 3, then y = (3,6).
+Geometrically, scalar multiplication scales the vector's magnitude without changing its direction. If a is greater than 1, the vector length increases; if a is between 0 and 1, the vector length decreases. If a is negative, the vector flips direction.
+So far, we have covered three fundamental operations: vector addition, vector subtraction, and scalar multiplication. These operations play a crucial role in various machine learning and deep learning algorithms. Many machine learning techniques rely on these fundamental operations, making them essential building blocks in AI applications.
+Video 2: Dot Product Operation and Norm of the Vector
+Now let us go for another important operation on the vectors that is what is called as the dot product. Later we go on to what is called as the norm of the vectors which is associated with this dot product only. So now let us look into this important operation, the dot product.
+Page | 4
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+This dot product is also called as the inner product. So when we say we are performing this dot product on two vectors, both vectors should be coming from the same space. That means both belong to the same d-dimensional space. Now, the dot product between two vectors x and y, for example, can be denoted as <x, y>. It is always represented between angular brackets, between the opening and closing angular brackets, we represent x, y. This indicates that this is a representation of the dot product between two vectors.
+The dot product between two vectors is nothing but the multiplication of the first vector, which is a transpose of the first vector, with the second vector y. By default, a vector is a column vector. When we perform the transpose of the vector, it becomes a row vector. Essentially, we are multiplying the row vector of x with the column vector of y. That means if both x and y have d number of elements, x^T gives me a row vector and y remains a column vector.
+When performing this multiplication, it is nothing but matrix multiplication. In matrix multiplication, we multiply each row element with the corresponding column element. Similarly, in the dot product, the first element of the row vector is multiplied by the first element of the column vector, the second element of the row vector is multiplied by the second element of the column vector, and so on, until all d elements are multiplied. The summation of these products results in a single scalar value.
+Each i-th element of x is multiplied by the corresponding i-th element of y, and all these values are summed up to form what is called the dot product. So, if you look here, the result of the dot product is always a scalar value.
+Most importantly, the physical interpretation of the dot product is that it gives a measure of how close two vectors are in that d-dimensional space. This is particularly useful in data analysis, where each data sample is represented as a feature vector. The dot product helps determine how similar or close one sample is to another.
+For example, let x and y be two vectors in a two-dimensional space. Geometrically, we can project x onto y, and the length of that projection gives the resultant value of the dot product. The length of this projection measures how closely x aligns with y.
+Consider a two-dimensional space where x = (1,2) and y = (3,2). The dot product x^T y is computed as follows:
+x^T = (1,2), and y = (3,2).
+Multiplying corresponding elements: 1 × 3 + 2 × 2 = 3 + 4 = 7.
+Thus, the result of the dot product is 7.
+This dot product operation is widely used in various vector operations, one of which is the norm of a vector.
+Page | 5
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+In the dot product operation, we computed the dot product between two different vectors x and y. Now, what happens if we compute the dot product of a vector with itself? This results in what is called the norm of a vector.
+Suppose x is a vector in three-dimensional space. The norm of a vector is given by the dot product of x with itself, followed by taking the square root of the result. The norm of a vector is represented using double vertical bars, ||x||, which is a standard mathematical notation.
+Mathematically, the norm is computed as:
+||x|| = sqrt(x^T x)
+Since the dot product between x and itself involves squaring each element and summing them, the result is:
+||x|| = sqrt(x1² + x2² + ... + xd²)
+The norm of a vector represents its magnitude or length. The specific norm we computed here is known as the L2 norm or Euclidean norm.
+For example, consider x = (3,4) in a two-dimensional space. The norm is computed as:
+||x|| = sqrt(3² + 4²) = sqrt(9 + 16) = sqrt(25) = 5
+Geometrically, the norm represents the length of the line joining the origin to the vector x.
+There are different types of norms. The L2 norm, which we computed, is the most commonly used. It is represented as ||x||₂, indicating that it is the L2 norm. A more generic form of norm is the Lp norm, where p can be any value from 0, 1, 2, up to infinity.
+The Lp norm is defined as:
+||x||ₚ = (Σ |xi|^p)^(1/p)
+For p = 2, this becomes the L2 norm (Euclidean norm).
+For p = 1, it is the L1 norm, which is simply the sum of the absolute values of the elements.
+For p = ∞, it is the L-infinity norm, which takes the maximum absolute value among the vector elements.
+For p = 0, it is the L0 norm, which counts the number of nonzero elements in the vector.
+For example, if x = (7, -6, 3), the L∞ norm is 7, as it is the maximum absolute value. If x = (-2, -10, 6), the L∞ norm is 10.
+The L0 norm counts the number of nonzero elements. If x = (1, 0, 3, 0, 6), then the L0 norm is 3, as there are three nonzero elements.
+Page | 6
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+These different norms provide different types of information about a vector. The L2 norm measures length, the L1 norm sums the magnitudes, the L∞ norm captures the maximum element, and the L0 norm measures sparsity.
+Norms play a crucial role in machine learning when dealing with data. If a feature vector contains mostly zero values, it is considered sparse. The L0 norm helps measure how sparse a vector is, which is useful in feature selection for machine learning models.
+Another important concept is the unit vector, which is a vector with a norm (length) of 1. A vector x can be converted into a unit vector by dividing it by its Euclidean norm:
+x̂ = x / ||x||
+For example, if x = (3,4), then ||x|| = 5, so the unit vector is:
+x̂ = (3/5, 4/5)
+The unit vector points in the same direction as x but has a magnitude of 1.
+Another important concept in machine learning is similarity and dissimilarity measures. The Euclidean distance between two vectors measures how far apart they are.
+The Euclidean distance between two vectors x and y is given by the L2 norm of their difference:
+||x - y||₂ = sqrt(Σ (xi - yi)²)
+If the distance is high, the vectors are dissimilar. If the distance is small, the vectors are similar. This makes Euclidean distance a measure of dissimilarity.
+Alternatively, we can measure similarity using the cosine similarity, which is given by:
+cos(θ) = (x^T y) / (||x|| ||y||)
+The cosine similarity measures the angle between two vectors. If θ = 0, the vectors are identical, and cos(0) = 1. If θ = 90°, the vectors are orthogonal, meaning cos(90) = 0, indicating no similarity.
+In summary, we explored dot products, vector norms, unit vectors, Euclidean distance, and cosine similarity. These concepts form the foundation for many machine learning algorithms and will be used extensively in later discussions.
+Video 3: Outer Product Operation and Linear Transformation
+Okay, so far we looked into one of the product operations between two vectors, that is a dot product operation or the inner product operation.
+Similar to that, there are different other than the inner product operation, we also have another product operation which is between the two vectors, that is what is called the outer product
+Page | 7
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+operation. And that is also one of the other products of the two vectors and the matrix, which leads to all the things we can see in this, okay.
+So, as I was mentioning, the outer product operation between two vectors x and y in the d-dimensional space is actually the reverse of what is called the dot product operation. In the dot product operation, we perform the product between the transpose of the first vector x and the vector y.
+But in the outer product operation, it is the reverse of that, where we multiply the column vector x with the row vector of the second vector y. That is, we are multiplying the vector x with the transpose of the other vector y.
+Interestingly, in the dot product operation, the result was a scalar value. However, in the outer product operation, the result is a matrix. The capital M in bold symbol indicates that it is a matrix, which is the convention we have followed, okay.
+Now, when I perform the outer product between x and y, we basically compute x multiplied by the transpose of y. If you observe, x is a column vector, and y is a row vector.
+When performing this operation, the first element of the column vector is multiplied by the first element of the row vector, then the first element of the column vector is multiplied by the second element of the row vector, and so on. This follows the matrix multiplication operation, where each column is multiplied with every row, right.
+This results in: x1 multiplied by y1, x1 multiplied by y2, x1 multiplied by yd, and similarly for x2 up to xd, corresponding to the row vector multiplications. As a result, we obtain what is called the matrix M.
+Here, the vector x is a d × 1 matrix and the vector y is a 1 × d matrix, which results in a d × d matrix as the output. Each element of the resultant matrix Mij is the product of the i-th element of x and the j-th element of y, where i and j run over d elements.
+This is what is called the outer product, which results in a matrix.
+Now, looking at another operation, the outer product operation is also known as the matrix product, which is another associated term.
+Suppose we have two vectors x and y of d dimensions and a matrix M of d × d space. Consider the operation where matrix M is multiplied by a vector x.
+When we perform M × x, the result is a new vector y. This is an interesting operation because the input vector x is transformed into a new vector y. Essentially, vector x serves as the input to a system, and the output we get is vector y.
+Page | 8
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+The function applied here is the matrix M, a d × d matrix, which transforms x into y. This transformation of x into a new vector y is key to understanding many machine learning techniques.
+Now, when we perform this operation, consider matrix M as a d × d matrix and x as a column vector. When we multiply M by x, each row of the matrix is multiplied by the column vector, resulting in:
+M11 × x1 + M12 × x2 + ... + M1d × xd (which forms the first row of the result).
+Taking the second row of M and multiplying with every element of x, summing them results in the second row of y.
+Thus, this multiplication results in a new vector y, where each element y1, y2, ..., yd is computed as the weighted sum of the elements of x.
+Now, if you examine the relationship between every element of x and the corresponding element in y, you will see that each element of x is linearly related to each element of y.
+Why is it linearly related? If we consider each value of M as a constant, then each element in y is a weighted sum of the elements in x. This forms a linear equation, meaning every element y1 is linearly related to x, y2 is linearly related to x, and so on.
+Since every element of vector x is linearly related to every element of vector y, the kind of transformation happening here is called a linear transformation.
+This operation is one of the most widely used in various machine learning algorithms, which we will be exploring further.
+What we have seen is that the outer product operation plays a role in later stages when dealing with covariance matrices. The outer product is used between the difference vector x and the mean of the vector, resulting in a covariance matrix.
+At the same time, linear transformation is a fundamental operation used in numerous machine learning techniques, which we will cover in greater detail later.
+Yeah.
+Video 4: More Operations on Vectors and Matrices
+Continuing our discussions on linear algebra, we were looking into vectors and operations on vectors.
+Page | 9
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+We saw that vectors are a special case of matrices, and even in the previous session, we looked into some operations on vectors where we multiplied a vector with a matrix, which led to what is called a linear transformation, along with some other operations.
+As part of this, one of the operations we are going to see is with respect to the multiplication of a matrix and a vector.
+Let x be a vector having d elements, and let M be a square matrix of size d × d. When I say it’s a square matrix, it means the number of rows and columns in that matrix are the same. That’s why it’s called a square matrix.
+The kind of operation we are seeing is xᵀ M x.
+This is an interesting operation because when these three entities are multiplied together, they result in what is called a scalar value.
+If we observe, when we say xᵀ, the column vector is transposed into a row vector, meaning it becomes 1 × d in size. The matrix M is of size d × d, and the vector x remains a column vector of siz d × 1.
+When we multiply M by x, a kind of linear transformation happens, resulting in a vector of size d × 1.
+Furthermore, when we perform the operation xᵀ M x, it essentially becomes a dot product operation between two vectors, resulting in a single scalar value y.
+Alright, so this is the operation that takes place.
+To illustrate this, consider the case when d = 2. My x vector has two elements, x₁ and x₂, and my matrix M has four elements in a 2 × 2 arrangement.
+Now, when we perform the operation xᵀ M x, we are dealing with a row vector, a matrix, and a column vector.
+First, if we consider the operation between M and x, we see that this is essentially a linear transformation operation, producing a column vector.
+Multiplying the row vector with this column vector is simply a dot product operation, resulting in a single expression, which is a scalar value a.
+That means the resultant operation produces a single scalar value.
+An interesting observation here is that xᵀ M x results in a quadratic expression.
+Why is it quadratic? Because it contains second-degree terms of x₁, x₂, and their product x₁ x₂.
+Page | 10
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+Thus, the entire expression is a combination of these second-degree terms, which is exactly why it is a quadratic expression.
+Hence, the operation xᵀ M x acts as a quadratic term.
+Though this is a simple operation, it plays an important role in some machine learning algorithms, which we will see later.
+Another important operation we are going to see is what is called the trace of a matrix.
+Again, we are dealing with a square matrix of size d × d. Given this d × d matrix, the trace of a matrix is defined as the sum of the diagonal elements of the matrix M.
+If we examine the matrix, elements M₁₁, M₂₂, M₃₃, ... Mdd are all part of the principal diagonal.
+Thus, the sum of these diagonal elements is called the trace of a matrix.
+Mathematically, these diagonal elements can be represented as Mii, where i refers to the i-th row and i-th column of the matrix for all i ranging from 1 to d.
+Summing over all these Mii elements from 1 to d gives the trace of the matrix.
+We will return to this concept later when discussing how it provides specific information about the matrix.
+Another commonly used operation in machine learning algorithms, which we will explore later, is the determinant of a matrix.
+In this session, I won’t explain how to compute the determinant of a matrix, as there are many different approaches.
+If you are interested, you can explore various resources available online or in linear algebra textbooks.
+What I am focusing on instead are the properties of the determinant that are useful for us.
+Mathematically, the determinant of a square matrix is a scalar value obtained from the elements of that matrix.
+Let M be a square matrix of size d × d.
+The determinant of a matrix is typically denoted by enclosing the matrix M between two vertical bars: |M|.
+In some literature, it is also written as det(M).
+Page | 11
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+A quick note: Don’t confuse this notation with absolute values.
+For scalar values, enclosing a number in vertical bars (e.g., |a|) represents its absolute value.
+However, for matrices, the same notation represents the determinant of the matrix.
+Since the determinant of a matrix is itself a scalar value, there is a conceptual similarity, but they are not the same.
+The determinant characterises certain properties of a matrix.
+Some of the key properties we will explore include:
+The determinant of a matrix is the same as the determinant of its transpose.
+If we take a matrix M, compute its determinant, and compare it to the determinant of Mᵀ, they will be the same.
+Another important property is that the determinant of the product of two matrices is equal to the product of their individual determinants.
+That is, if M and N are both d × d square matrices, then:
+det(M × N) = det(M) × det(N)
+Both matrices must be square and of the same size for this property to hold.
+Now, another essential operation for us is the inverse of a square matrix.
+The inverse of a square matrix is denoted as M⁻¹.
+One key property of the inverse of a matrix is that when a matrix is multiplied by its inverse, it results in what is called the identity matrix.
+That is, if M × M⁻¹ or M⁻¹ × M is computed, the result is the identity matrix.
+The identity matrix is a special matrix where all diagonal elements are 1, and all off-diagonal elements are 0.
+Another name for the identity matrix is the unit matrix.
+For example, in a 3 × 3 case, the identity matrix looks like this:
+I = | 1 0 0 |
+| 0 1 0 |
+Page | 12
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+| 0 0 1 |
+A common mistake people make is confusing the identity matrix with a matrix of ones.
+A matrix of ones means all elements are 1, whereas the identity matrix has ones only on the diagonal.
+Thus, the identity matrix is a diagonal matrix with 1s along the diagonal and 0s elsewhere.
+This is an important property when dealing with the inverse of a matrix, as it guarantees that multiplying a matrix by its inverse results in the identity matrix.
+Now, the concept of an inverse also applies to rectangular matrices, where the number of rows and columns are not equal.
+For example, if M is a d × l rectangular matrix, its inverse is called the pseudo-inverse.
+The pseudo-inverse is represented as M⁺ (superscript +).
+Mathematically, the pseudo-inverse of a matrix is obtained by computing:
+M⁺ = (Mᵀ M)⁻¹ Mᵀ
+Here, Mᵀ is the transpose of M, and (Mᵀ M)⁻¹ is the inverse of the product Mᵀ M.
+The resulting pseudo-inverse M⁺ has dimensions l × d.
+A crucial property of the pseudo-inverse is that multiplying it by the original matrix M gives an identity matrix.
+This property must hold for the pseudo-inverse to exist.
+Later, when we discuss polynomial regression and linear regression, we will see how the pseudo-inverse plays a key role in estimating parameters.
+We will revisit this concept when studying machine learning techniques that use it.
+So far, we have explored different ways of multiplying matrices with vectors and key operations such as the trace of a matrix, determinant, and inverse.
+With these operations covered, we now move on to the next topic: eigen analysis.
+Video 5: Eigen Analysis
+Now we look into one of the important operations on the matrices, that is basically the Eigen analysis.
+Page | 13
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+This operations is primarily, we perform it on the square matrix, where the size of the matrix is the same, that is basically the d cross d size, where the number of rows and number of columns are same.
+So here, we will be revisiting some of the operations, which we have done earlier also to, in the context of the Eigen analysis, what information they reveal from the matrices.
+So, that is what we are going to see as a part of this.
+Now, let us try to understand, what is this Eigen analysis, what is Eigen vectors and Eigen matrices.
+Now, as I mentioned, we are dealing with a matrix, which is symmetric and also each values of a matrix are the real in number and since it is a square matrix, we are looking into, it is of the size d cross d.
+So here, when I say, a matrix is symmetric, then it is a meaning that, the matrix has the upper triangular element and the lower triangular element.
+The values, what is taking in the upper triangular element and the lower triangular element will be the same.
+For example, suppose, we are having the, let us take d is equal to 3 and as a part of this, the matrix will be, I will be writing this as M 1 1, M 1 2, M 1 3, M 2 1, M 2 2, M 2 3 and M 3 1, M 3 2 and M 3 3 are the total 9 elements of this matrix d.
+Now, here, as we have seen earlier, M 1 1, M 2 2 and M 3 3, these are the elements of the diagonal elements.
+Now, of diagonal elements, other things, M 1 2, M 1 3, these elements, what I am marking here.
+So, this M 1 2, M 1 3 and M 2 3 are the upper triangular element, they form kind of a triangle here.
+So, similarly, M 2 1, M 3 2 and M 3 3, M 3 1 and M 3 2, these three form the lower triangular.
+Now, a matrix is said to be a symmetric matrix, where if I consider an element, M ith element, ith row and jth column element, if it is equal to the M jth row and ith column element, then it is called as the, for all i which is not equal to j, then it is called as the symmetric matrix.
+That means, M ij, suppose i is equal to 1, that means that M 1 2, if it is equal to M 2 1, M 1 2 means this element and M 2 1 is this element.
+If these two things are equal, like that rest of the other things also, for all i and j which are not equal.
+So, for all i and j here, so this is what is called as the symmetric matrix.
+Page | 14
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+It is a very specific form of a matrix and then we are dealing with respect to that.
+So, let q be the vector of having the d elements, this is a d cross 1 column vector.
+Now, if I consider this a specific operation, what you are going to see here, so this is the same operation which you already looked into earlier.
+So here, what I am going to do here, I have taken this square symmetric matrix M and I multiplied with this vector q.
+What is this operation we did earlier?
+This is basically a kind of a linear transformation which we did, when a matrix is multiplied with a vector q, it resulted into a vector.
+Now, in the special case what we are seeing here, if the vector, the resultant vector what we are getting is a scalar multiplication of the same vector itself, then this is a very special case and such a case we call it as a characteristics equation of the matrix M.
+Now, when this happens, if I move this lambda q onto the left hand side, then it becomes Mq minus lambda times the q is equal to what it remains into, then it results into, when it moves over there, it becomes a zero vector.
+If I take the q on the outside, it becomes lambda minus M minus lambda I into q.
+Now, what is I?
+I is the identity matrix.
+What do you mean by the lambda into I?
+Basically, I am multiplying a scalar to this particular identity matrix.
+That means that now the resultant matrix will have all the diagonal elements having the value lambda.
+That is what is the thing.
+Basically, only the diagonal elements will be subtracted from my square matrix M.
+So, this is what is the thing.
+So basically, when this is a characteristics equation happens, suppose I have some vector q, when I multiply that vector with respect to the matrix, it results into a vector which is a scalar multiple of the vector.
+So now, we also see one important property.
+When a scalar multiplication of the vector happens, what happens?
+Page | 15
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+It results into a new vector, but its magnitude only changes, but direction remains the same.
+So that is the important aspect.
+We will see that again here and its significance here.
+Now, for a given mat, there may be several such vector q's and several values of lambdas can be possible for which this characteristics equation, that is a property multiplying M q is equal to lambda times the vector q, so that can satisfy.
+When such a thing satisfies, then the vector, the special vector for which such a characteristics equation satisfies, so such a vector is called as the eigenvector.
+And the value of the lambda for which this characteristics equation of a matrix M satisfies, so then such a value is called as the eigen value.
+So let us try to understand this with respect to some illustration.
+So, let us take a symmetric matrix M, which is having the two elements, that is a 2 cross 2 element.
+So the diagonal elements are 1 and then off-diagonal elements are 6, that is why it is a symmetric matrix.
+And we know that, suppose if I take a vector q having the value 1 and 3, so if I multiply a vector with respect to a matrix, which we already seen that, what happens, it simply gets transformed into the new vector, this is what we are seeing here, this is we already seen in the previous session also, this basically a linear transformation happen.
+See what happen, its direction changes, at the same time the magnitude also changes, this is the general case when a matrix is multiplied with a vector.
+Now, the special case what we are seeing here is that, suppose there exist some special matrix vector, when I multiply that special vector with respect to this matrix, what I expect is that, it results into a new vector S, but it not going to change the direction.
+Earlier we saw that in the general case, it changes the direction as well as its magnitude also changes, but if there exist a special vector, when I multiply that with this matrix M, it results into a new vector, which does not change the vector, which does not change the direction.
+Say for example, one such vector I considering here is the vector q having the value 1 and 1 for both the x1 and x2, q1 and q2 psi.
+So, now when I multiply this q with respect to the M, so what will happen, basically what is M?
+M is 1, 2 and this 2, 1, when I multiply the q, M into q, 1, 1, what happens?
+Page | 16
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+It results into 1 into 1, 1 plus 2 into 1, 2, similarly 2 into 1, 2 plus 1 into 1, 1, which results into a vector with the value 3 and 3.
+So when you see this a vector having the value 3, it can be, now we can see that geometrically if you see here, it resulted into a vector 3, 3, which is in the same direction as my original vector q.
+It resulted in a new vector, but its direction remains the same.
+Now if you pay attention to this vector, if I take the 3 out of this particular vector, then it results into 3 times the same vector 1, 1.
+What is this vector 1, 1?
+It is the same vector, my original vector.
+That means that it is a kind of a scalar multiplication of the original vector itself.
+If 3 is a kind of a lambda, which is a scalar value of the same vector multiplied with the vector q, that is what is the resultant.
+This is what we have discussed so far.
+Video 6: Eigen Analysis: Basic Properties
+Going further, we let us look into some more basic properties of the Eigen analysis.
+They are not directly coming up with, but we with respect to the matrix having the characteristics equations.
+So, we lead to and this Eigen analysis extract some of the key information’s from them, that is where these basic properties come into picture.
+And that is also play a very important role in devising some of the machine learning and deep learning techniques.
+So, one of the basic properties when we are looking into that is that what we are dealing with is a square symmetric matrix, when a matrix is a square and symmetric and of the size d cross d and my Eigen values, there are d Eigen values and d Eigen vectors are there.
+So, one of the property is that if I find the, we just now we have seen the trace of a matrix, we have seen that as a property of any matrix.
+Now, if you consider a matrix which also satisfying a, what is a characteristics equation, that is when I take any vector q, when you multiply that vector with respect to the particular matrix, square matrix and which results into what is called as the scalar multiplication of the same vector itself.
+Page | 17
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+If from such a matrix, if I compute the trace of that matrix, then it results into the sum of the d Eigen values of that particular matrix.
+This is one of the important property.
+What does it says?
+Suppose, if I am having a square symmetric matrix which is satisfying this characteristics equation, then the trace of the matrix, what do you mean by the trace of the matrix?
+What we saw is that, sum of the diagonal elements of that matrix which is equivalent to the, nothing but it is equivalent to the sum of the Eigen values of that matrix.
+In a matrix of d cross d size, we will be having the, what is called as the d number of Eigen values are there.
+So, basically as an illustration if you consider, let this is take the same 2 cross 2 matrix having the values 1 2 and 2 1.
+And if I perform the Eigen analysis, I get the Eigen values as the lambda 1 as a minus 1 and the lambda 2 as a 3.
+Now based on the definition of the trace, if I compute the trace of this matrix M, so here the trace becomes the sum of the diagonal elements.
+What are the diagonal elements?
+1 and 1 are the diagonal elements, if I sum them, it is equal to 2.
+Now what are the Eigen values here?
+Minus 1 and the 3, if I sum these Eigen values, lambda 1 and lambda 2, that is also equal to 2.
+This is what is the property that is suggesting that.
+That means that this particular matrix M, it is satisfying the characteristics equation.
+There are 2 Eigen vectors and there are 2 Eigen values and these sum of this Eigen values are equal to that of the trace of the Eigen, trace of this matrix.
+This is one of the property what we were interested in.
+The another property is that it can be shown that if I compute the determinant of the matrix, so we discussed earlier that the determinant is indicating it is kind of a scalar value which some characteristics of the matrix it will be reflected.
+Page | 18
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+So now if you compute the determinant of such a matrix which is satisfying this characteristics equation, then that determinant will be equivalent to the product of the Eigen values of that particular matrix.
+So that means if I compute the determinant of this square symmetric matrix, it is nothing but the product of the Eigen values of this, how many Eigen values are there, d Eigen values are there, product of these d Eigen values of this matrix.
+So this is what I was talking about.
+The determinant of such a matrix reveals this information.
+That is an example for the same matrix M.
+So we know that the Eigen values are the minus 1 and the 3.
+Now if I compute the determinant of this, again there is a procedure with which I computed the determinant of this particular matrix.
+When I computed it, the determinant of this matrix is minus 3.
+Now if I multiply these two Eigen values, minus 1 and 3, it also results into what is called as the minus 3.
+This is what I am showing that the next property of that Eigen analysis.
+This is also one of the important properties which we will be seeing.
+Now on the basis of these properties, we also have some interesting operations on the matrix which leads to what is called as the positive semi-definite matrix and the positive definite matrix.
+So this also plays a very important role in various machine learning algorithms.
+Now again, it also has something to do with what is called as the Eigen analysis.
+Now a matrix is said to be a positive semi-definite, let us see the first is the positive definite matrix and then later we will see the positive semi-definite.
+A matrix is said to be a positive definite if it is a symmetric matrix and this operation of the x transpose m into x always leads to a positive scalar value.
+That means x transpose mx is greater than 0 for any vector x.
+If this satisfies then that particular matrix m is called as the positive definite matrix.
+Page | 19
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+If you recall, we saw one of the key operations of the matrix multiplications where x transpose of the vector x is multiplied with the matrix m and again it is also multiplied with the column vector x.
+This we saw that it leads to what is called as the scalar value.
+And this scalar value is always greater than 0.
+That means that it is always positive.
+If this matrix is a symmetric and this satisfies then such a matrix is called as a positive definite matrix.
+So this leads to one of the properties which is related to what is Eigen analysis.
+So what is special about that?
+The positive definite.
+If a matrix is positive definite then if you perform an Eigen analysis and then if you get the Eigen values and these Eigen values, all the Eigen values are positive Eigen values.
+That is the important property and its relation with the Eigen values.
+So that is the important thing.
+Now if you come to the positive semi-definite, so a matrix is said to be a positive semi-definite if it is a symmetric matrix like the positive definite itself.
+But only change is that this operation, the quadratic term when we do here, so this entity it leads to a scalar value which is greater than or equal to 0.
+That means that when a matrix is positive semi-definite this operation x transpose m into x can get a 0 value or a positive value.
+But if it is a positive definite this operation will strictly is going to give you a positive value.
+That is the important aspect.
+Now what is it to do with the Eigen values?
+Now with this case for any positive semi-definite matrix if you compute the Eigen analysis we get an Eigen values.
+These Eigen values are non-negative.
+Page | 20
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+That means that some of the Eigen values can be 0 and remaining Eigen values are strictly positive.
+That is the property and its relation with the Eigen values.
+So these are the few of the properties of the Eigen analysis which will be playing a very important role in devising many of the machine learning algorithms.
+So we will revisit all these operations whenever techniques which we will be discussing like deep learning or the machine learning techniques we will be discussing at the later stages.
+So we will again be revisiting these things
+Video 7: Eigen Decomposition
+Now, what we can get into the another important aspect about this properties of this matrix and the operations on the matrix, which is related to this Eigen analysis is what is called as the Eigen decomposition.
+So, basically the what Eigen decomposition says is that, see one thing you should remember always here is that, the Eigen analysis we always do it on the square matrix. That means, the size of the matrix is the d cross d number of rows and the number of columns are same.
+So, this is one you should keep in mind.
+So, this Eigen decomposition is always applicable to the square matrix. Basically, what it the name decomposition says is that, so given any square matrix d, you can decompose into the multiple matrix and then you can express this matrix with respect to that decomposed matrix.
+What this Eigen decomposition shows that, for any matrix d of the size d cross d, this square matrix can be expressed in terms of the two other matrix, that is the U matrix and the lambda matrix, where U matrix is the matrix of the Eigen vectors and lambda matrix is the diagonal matrix, where the diagonal elements are the Eigen values.
+So, now if you see the U matrix here, so basically every column of this matrix is a column Eigen vectors.
+So, that is where you can express a particular matrix M as the product of the U matrix and the lambda matrix and the transpose of that U matrix.
+So, what does that happen? What is the size of the U matrix?
+The U matrix is of this size.
+Basically, each Eigen vectors are of the dimension d.
+Page | 21
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+So, how many such Eigen vectors are there? d Eigen vectors are there.
+So, this is d cross d matrix of the Eigen vectors and then lambda is a diagonal Eigen values, diagonal matrix.
+That means, it is again d cross d matrix, where all the non-diagonal elements are zero and the diagonal elements are the Eigen values of that d Eigen values and then U transpose matrix is nothing but it is the, again it is a d cross d matrix itself.
+So, the resultant matrix is what is called as the M, which is also of the size d cross d here.
+So, that is a important aspect.
+This is what I was talking about.
+The lambda matrix is that all the diagonal elements have the corresponding Eigen values, d Eigen vectors.
+So, it can be shown that by this, that the, this operations is equal to the, what is this operation q i into q i transpose.
+This is basically, it is the, basically it is the outer product of the two matrix.
+So, if you recall that when outer product of the two vectors, it is going to give you, it results into what is called as the matrix.
+So, here the outer product between what? Outer product between the Eigen vector with respect to itself.
+So, that results into a matrix of d cross d matrix and it is multiplied by the corresponding Eigen value.
+Like that, if you do it for every Eigen vectors, you get the d such matrix and if you sum all these d such matrix, what it results into is what is called as the original matrix M itself.
+The entire this matrix operations is, can be shown as this particular expression.
+So that means that in a nutshell, what is this Eigen decomposition says is that any square matrix M can be completely represented in terms of the Eigen values and the Eigen vectors.
+So, that is what is, we call it as a Eigen decomposition.
+That is why the name Eigen decomposition.
+You are decomposing your matrix and you can representing them into the Eigen vectors and the Eigen values.
+Page | 22
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+That is what is the, we call it as a Eigen decomposition.
+We will come back to these things when we are discussing with respect to the various other machine learning algorithm, wherever these things comes with that.
+So, what we see now is a Eigen decomposition and the operations of the Eigen analysis and all these things with respect to what is called as the square matrix.
+Now, the question arises, can we do this analysis on the rectangular matrix also?
+That means that the matrix shall not square.
+That means that the number of rows and number of columns are different.
+So, that is what I will be summarising in the next slide..
+Video 8: Singular Value Decomposition
+So, what is what we going to see in the next is that in general operation is called as the singular value decomposition.
+So, singular value decomposition is generalization on the what is called as the Eigen analysis itself.
+So, where this singular value decomposition is applied on the rectangular matrix, where the number of rows and the number of columns are not the same.
+Now, for any matrix of the size m cross n, when I say m cross n, m number of rows and m number of columns it is having, obviously they are not square matrix.
+Now, such a rectangular matrix can be best represented by the three matrices, u matrix, sigma matrix and the v matrix.
+So, this is what is basically we are decomposing that rectangular matrix into three matrices and the product of those three matrices which results into the same matrix m.
+What is this u matrix?
+Like we saw earlier, so u matrix will have the m number of left singular vectors.
+It is a m number of left singular vectors and v matrix is having the n number of, it is a matrix of right singular matrix vectors.
+And importantly these singular vectors are of r dimensional vectors and not just simply a vectors, they are the orthonormal basis vectors.
+Page | 23
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+So, now we can recall its equivalent that the Eigen vectors are the orthonormal basis vectors.
+So, in general this u1, u2 up to um, they are the left singular vectors, they are also the orthonormal basis vectors and v1, v2 and vm, they all are the orthonormal basis vectors.
+What do you mean by the orthonormal basis vectors?
+Basically, if you take any two vectors ui and uj, two vectors, the dot product between them is equal to zero for all i which is not equal to j.
+And if you compute the ui transpose, the ui itself that is the dot product between the vector itself is equal to unit vector.
+That is why they are called as the orthonormal basis vectors.
+So, like that all these vectors also, u vectors and the v vectors are also the left and right singular vectors.
+So, the dimension of these u vectors are, is the some r dimensional vectors.
+And what is r?
+So, look at here, in terms of the, the Eigen analysis, this r was equal to that of the d, because we are dealing with everything is a square matrix.
+But now here, the number of rows and the vector, the columns are different, that is m and n are not the same.
+So, that is why it is the case, alright.
+So, now if you really see here, they r usually it is a less than or equal to the minimum of the either m or n.
+So, obviously when the number of rows and number of columns are different, one of them is minimum, the r will be the minimum among these two things.
+Now, if you look into this sigma matrix, it is a diagonal matrix of the singular values.
+That means for every Eigen singular vectors, there exists what is called as the singular values.
+And it is a diagonal matrix of the singular values, alright.
+So, this is the generalization of the, what is called as the, the Eigen analysis on all type of the matrix.
+Page | 24
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+Now, if you consider, if my m is equal to d and n is equal to d, both are same, then this turns out to be the Eigen analysis itself.
+That is a relation with respect to this singular value decomposition and the Eigen analysis or Eigen decomposition, alright.
+So, both are the same.
+The, the Eigen decomposition is a special case of the singular value decomposition.
+So, this is the, this is also one of the important aspects we will be going to, specifically when we are dealing with respect to the autoencoders and some other concepts in the deep neural networks.
+So, we will be coming across this particular concept of singular value decomposition, where we are going to see its importance, its role in those deep learning techniques, alright.
+So, all together so far, we looked into the, the different aspects about the, the linear algebra.
+This comes to an end of this session on the, the basics of the linear algebra.
+So, you might be seeing here, I have not covered all topics that comes under this linear algebra.
+That is a vast subject, okay.
+As a part of the, as in the context of the machine learning and deep learning, what aspect which is importantly needed, that is what we have discussed here, alright.
+So, basically, we started with the vectors and the matrices, the operations on the vectors and the matrices.
+We looked into the, what is called as the dot product operations, that is nothing but the inner product operations, outer product operation, linear transformations, different type of the, you know, matrix and vector multiplication.
+We also looked into the eigenanalysis, right, eigenvalues and the eigenvectors we discussed.
+We also discussed about the singular value decompositions.
+So, all together, these are some of the important aspects, which is very much important in various concepts, which we will be encountered in the machine learning and the deep learning, okay.
+Later, we will be revisiting again these things, when we are discussing about the calculus, basically the, when you perform some kind of a differentiation operations, how we can apply
+Page | 25
+Advanced Certificate Programme in Applied Artificial Intelligence and Machine Learning
+these things onto the scalar values, these vectors and vector operations, which leads to some of the scalar or the vectors and how this calculus can be applied over there, that is what we are going to see and because these things are very much important when we do some sort of an optimization, which is a key in the devising various algorithms of the machine learning and the deep learning, okay.
+This is what we are going to see in the next session.
