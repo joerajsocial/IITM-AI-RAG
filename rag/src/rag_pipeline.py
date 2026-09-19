@@ -11,14 +11,22 @@ from __future__ import annotations
 import os
 import numpy as np
 from openai import OpenAI
+import time
+import asyncio
+
+#logging and settings
+## - to implement ==>> from .logging_config import get_logger
+from .rag_settings import Settings, RunSummary
 
 assert os.environ.get("OPENAI_API_KEY"), "Set OPENAI_API_KEY before importing"
 
+_rag_settings = Settings()
+
+EMBED_MODEL = _rag_settings.EMBED_MODEL
+CHAT_MODEL = _rag_settings.CHAT_MODEL
+
+
 _client = OpenAI()
-
-EMBED_MODEL = "text-embedding-3-small"
-CHAT_MODEL  = "gpt-4o-mini"
-
 
 # ─── Chunking ────────────────────────────────────────────────────────
 
@@ -104,30 +112,49 @@ def build_prompt(question: str, retrieved: list[dict],
     return system, user_msg
 
 
-def ask_rag(question: str, index: list[dict], k: int = 3,
+async def ask_rag(question: str, index: list[dict], k: int = 3,
             system: str = DEFAULT_SYSTEM,
             embed_model: str = EMBED_MODEL,
             chat_model: str = CHAT_MODEL) -> dict:
     """Full pipeline: retrieve → prompt → generate. Returns dict with
     answer, sources, cost, latency-relevant token counts."""
-    retrieved = retrieve(question, index, k=k, embed_model=embed_model)
-    system_msg, user_msg = build_prompt(question, retrieved, system=system)
-    resp = _client.chat.completions.create(
-        model=chat_model,
-        temperature=0.0,
-        messages=[
-            {"role": "system", "content": system_msg},
-            {"role": "user",   "content": user_msg},
-        ],
-    )
-    return {
-        "question":   question,
-        "answer":     resp.choices[0].message.content,
-        "sources":    [hit["chunk_id"] for hit in retrieved],
-        "tokens_in":  resp.usage.prompt_tokens,
-        "tokens_out": resp.usage.completion_tokens,
-        "retrieved":  retrieved,  # full retrieved chunks for inspection
-    }
+    if _rag_settings.RETRIVE_FROM_COLLECTION:
+        retrieved = index
+    else: 
+        retrieved = retrieve(question, index, k=k, embed_model=embed_model)
+    start_time = time.perf_counter()
+    # Augmentation and generation only if generation is True
+    if _rag_settings.GENERATE_ANSWER_RAG:
+        system_msg, user_msg = build_prompt(question, retrieved, system=system)
+        resp = _client.chat.completions.create(
+            model=chat_model,
+            temperature=0.0,
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user",   "content": user_msg},
+            ],
+        )
+        latency_s = time.perf_counter() - start_time
+        return {
+            "question":   question,
+            "answer":     resp.choices[0].message.content,
+            "sources":    [hit["chunk_id"] for hit in retrieved],
+            "tokens_in":  resp.usage.prompt_tokens,
+            "tokens_out": resp.usage.completion_tokens,
+            "retrieved":  retrieved,  # full retrieved chunks for inspection
+            "latency_s": latency_s
+            }
+    else:
+        latency_s = time.perf_counter() - start_time
+        return {
+            "question":   question,
+            "answer":     "",
+            "sources":    [hit["chunk_id"] for hit in retrieved],
+            "tokens_in":  0,
+            "tokens_out": 0,
+            "retrieved":  retrieved,  # full retrieved chunks for inspection
+            "latency_s": latency_s
+            }
 
 
 def cost_usd(input_tokens: int, output_tokens: int) -> float:
@@ -135,3 +162,14 @@ def cost_usd(input_tokens: int, output_tokens: int) -> float:
     ##Use TikToken - currently defaulted
     cost = ((input_tokens*0.1) +(output_tokens*0.25) )/1_000_000
     return cost
+
+
+def calculate_hit_rate(retrieved_chunk_ids: list[str], ground_truth_chunk_id: str) -> int:
+    """
+    Checks if the ground truth chunk is present in the top-K retrieved chunk IDs.
+    Returns 1 (Hit) or 0 (Miss).
+    """
+    return 1 if ground_truth_chunk_id in retrieved_chunk_ids else 0
+
+
+
