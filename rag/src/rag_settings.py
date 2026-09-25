@@ -31,7 +31,7 @@ class Settings(BaseModel):
     EMBED_MODEL:    str  = "text-embedding-3-small"
     CHAT_MODEL:     str  = "gpt-4o-mini"
     RETRIVE_FROM_COLLECTION: bool = True
-    GENERATE_ANSWER_RAG: bool = False
+    GENERATE_ANSWER_RAG: bool = True
 
 class RunSummary(BaseModel):
     """One row per pipeline execution. Persisted to the `runs` table."""

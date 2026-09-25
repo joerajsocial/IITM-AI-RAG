@@ -13,6 +13,16 @@ import numpy as np
 from openai import OpenAI
 import time
 import asyncio
+import re
+
+
+# Qdrant DB
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+
+assert os.environ.get("QDRANT_URL"),     "Set QDRANT_URL — get free-tier at cloud.qdrant.io"
+assert os.environ.get("QDRANT_API_KEY"), "Set QDRANT_API_KEY — from your Qdrant Cloud cluster"
+
 
 #logging and settings
 ## - to implement ==>> from .logging_config import get_logger
@@ -172,4 +182,234 @@ def calculate_hit_rate(retrieved_chunk_ids: list[str], ground_truth_chunk_id: st
     return 1 if ground_truth_chunk_id in retrieved_chunk_ids else 0
 
 
+def calc_golden_hit_cost_lat(responses: list) -> dict:
+    Total = 0
+    Hit_rate = 0
+    Latency = 0
+    total_cost_usd = 0
+    for result in responses:
+        Total = Total + 1
+        Hit_rate = Hit_rate + result['hit_rate']
+        Latency = Latency + result['latency_s']
+        total_cost_usd = total_cost_usd + result['cost']
+    return {"total_hits":Total, "hit_rate": Hit_rate, "latency": Latency, "total_cost_usd": total_cost_usd}
 
+
+
+qdrant = QdrantClient(
+    url=os.environ["QDRANT_URL"],
+    api_key=os.environ["QDRANT_API_KEY"],
+)
+
+# Sanity check — list existing collections
+existing = qdrant.get_collections()
+print(f"Connected to Qdrant at {os.environ['QDRANT_URL'][:40]}...")
+#print(f"Existing collections: {[c.name for c in existing.collections]}")
+#print("\n[] (empty), — this is a fresh cluster.")
+
+
+
+COLLECTION_NAME = "sample_collection"
+
+#Create collection
+
+def create_collection(coll_name: str =COLLECTION_NAME):
+    # Delete any prior version — makes this cell re-runnable
+    try:
+        qdrant.delete_collection(coll_name)
+        print(f"Deleted existing {coll_name!r} collection.")
+    except Exception:
+        pass  # didn't exist yet
+
+    # Create fresh
+    qdrant.create_collection(
+        collection_name=coll_name,
+        vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
+    )
+
+    info = qdrant.get_collection(coll_name)
+    print(f"Created collection {coll_name!r}")
+    print(f"  dim:      {info.config.params.vectors.size}")
+    print(f"  metric:   {info.config.params.vectors.distance}")
+    print(f"  points:   {info.points_count}")
+
+
+# Upsert - Insert/ update the data into collections
+
+def upsert_collection(coll_name: str, index_docs: list[dict] | str):
+    import ast
+    
+    if coll_name =="":
+        coll_name = COLLECTION_NAME
+    print(index_docs)
+
+    #if isinstance(index_doc, str):
+    #    index_doc = ast.literal_eval(index_doc)
+
+    points = [
+        PointStruct(
+            id=idx,
+            vector=doc["vector"],
+            payload={
+                "source_id": doc["source_id"],
+                "chunk_id":  doc["chunk_id"],
+                "text":      doc["text"],
+            },
+        )
+        for idx, doc in enumerate(index_docs)
+    ]
+
+    qdrant.upsert(collection_name=coll_name, points=points)
+
+    # Verify
+    info = qdrant.get_collection(coll_name)
+    print(f"Upserted {len(points)} points.")
+    print(f"Collection now has {info.points_count} points.")
+
+
+async def retrive_from_collection(q_vec: list, coll_name: str=COLLECTION_NAME, k: int =3 ):
+    if len(q_vec) > 0 and isinstance(q_vec[0], list):
+        q_vec = q_vec[0]
+
+    results = qdrant.query_points(
+        collection_name=coll_name,
+        query=q_vec,
+        limit=k,
+    ).points
+    return results
+
+async def dense_search(query: str, COLLECTION_NAME: str, k: int=3):
+    qry = []
+    qry.append(query)
+    q_vec = embed_batch(qry)
+    top5_vec = await retrive_from_collection(q_vec, COLLECTION_NAME, 5)
+    dense_results = [
+        {
+            "chunk_id": pt.payload.get("chunk_id"),
+            "source_id": pt.payload.get("source_id"),
+            "text": pt.payload.get("text"),
+            "score": pt.score,
+        }
+        for pt in top5_vec
+    ]
+    return dense_results
+
+def delete_collection(coll_name: str=COLLECTION_NAME):
+    try:
+        qdrant.delete_collection(COLLECTION)
+        return "Deletion success"
+    except Exception:
+        return Exception
+
+
+def fetch_all_chunks_from_qdrant(coll_name: str) -> list[dict]:
+    client = QdrantClient(
+        url=os.environ.get("QDRANT_URL"),
+        api_key=os.environ.get("QDRANT_API_KEY"),
+    )
+    
+    all_chunks = []
+    next_offset = None
+
+    while True:
+        # Batch retrieve records without downloading vectors
+        records, next_offset = client.scroll(
+            collection_name=coll_name,
+            limit=250,           # Number of points per network request
+            with_payload=True,   # Includes text, sourceid, etc.
+            with_vectors=False,  # Speeds up fetch time
+            offset=next_offset
+        )
+        
+        for point in records:
+            payload = point.payload or {}
+            all_chunks.append({
+                # Prefers payload['chunkid'] if present, otherwise falls back to Qdrant's point.id
+                "chunk_id": payload.get("chunk_id", point.id),
+                "source_id": payload.get("source_id", ""),
+                "text": payload.get("text", "")
+            })
+            
+        # None means all points have been retrieved
+        if next_offset is None:
+            break
+            
+    return all_chunks
+
+
+
+def simple_tokenize(text: str) -> list[str]:
+    """Lowercase + word-and-alphanumeric-token split.
+    """
+    text = text.lower()
+    # Match tokens: sequences of word chars possibly containing hyphens/slashes
+    # This keeps 'ac-1042' and '/v2/dashboards' as single tokens
+    return re.findall(r'[a-z0-9][a-z0-9\-/_]*', text)
+
+
+def build_bm25_index(corpus: list[dict]):
+    """Build a rank-bm25 BM25Okapi index over the corpus text field."""
+    from rank_bm25 import BM25Okapi
+    tokenized_corpus = [simple_tokenize(doc["text"] + " " + doc["source_id"]) for doc in corpus]
+    return BM25Okapi(tokenized_corpus)
+
+
+async def bm25_search(query: str, index, corpus: list[dict],  k: int = 3) -> list[dict]:
+    """Query BM25 index; return top-K docs with scores."""
+    tokens = simple_tokenize(query)
+    scores = index.get_scores(tokens)
+    ranked = sorted(zip(scores, corpus), key=lambda pair: pair[0], reverse=True)
+    retrived = [
+        {"chunk_id": doc["chunk_id"], "source_id": doc["source_id"], "score": float(score), "text": doc["text"]}
+        for score, doc in ranked[:k]
+    ]
+    return retrived
+
+
+
+def rrf_fuse(ranked_lists: list[list[dict]], k: int = 60, top_n: int = 10) -> list[dict]:
+    """Fuse multiple ranked result lists via Reciprocal Rank Fusion.
+    RRF formula:  score(doc) = sum_over_lists( 1 / (k + rank_in_list) )
+    k=60 is the Cormack et al. (2009) default — high enough to make top-1
+    only slightly more valuable than top-2 (prevents any single retriever
+    from dominating), low enough that rank still matters.
+    Each ranked_list contains dicts with 'id' key. Returns fused ranking.
+    """
+    scores: dict[str, float] = {}
+    docs: dict[str, dict] = {}
+
+    for ranked in ranked_lists:
+        #print(f"Ranked: {ranked}")
+        for rank, hit in enumerate(ranked, start=1): 
+         #   print(f"rank: {rank} <<>> hit: {hit}")
+            doc_id = hit["chunk_id"]
+            scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank)
+            if doc_id not in docs:
+                docs[doc_id] = hit
+    
+    fused = sorted(scores.items(), key=lambda p: p[1], reverse=True)[:top_n]
+    return [
+        {**docs[doc_id], "rrf_score": score}
+        for doc_id, score in fused
+    ]
+
+
+
+async def process_goldenset_dense_search(qry, qry_vec, coll_name, k):    
+    topK_vec = await retrive_from_collection(qry_vec, coll_name, k)
+    # Parse
+    parsed_results = [
+        {
+            "chunk_id": pt.payload.get("chunk_id"),
+            "source_id": pt.payload.get("source_id"),
+            "text": pt.payload.get("text"),
+            "score": pt.score,
+        }
+        for pt in topK_vec
+    ]
+    # Generate RAG response
+
+##    return await ask_rag(qry_vec, parsed_results, k)
+    return {"question": qry, 
+            "retrived": parsed_results
+    }

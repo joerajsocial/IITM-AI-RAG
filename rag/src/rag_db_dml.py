@@ -89,3 +89,10 @@ async def retrive_from_collection(q_vec: list, coll_name: str=COLLECTION_NAME, k
         limit=k,
     ).points
     return results
+
+def delete_collection(coll_name: str=COLLECTION_NAME):
+    try:
+        qdrant.delete_collection(COLLECTION)
+        return "Deletion success"
+    except Exception:
+        return Exception
