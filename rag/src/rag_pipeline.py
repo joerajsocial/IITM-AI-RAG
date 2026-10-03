@@ -28,12 +28,15 @@ assert os.environ.get("QDRANT_API_KEY"), "Set QDRANT_API_KEY — from your Qdran
 ## - to implement ==>> from .logging_config import get_logger
 from .rag_settings import Settings, RunSummary
 
+assert os.environ.get("OPENAI_BASE_URL"), "Set OPENAI_API URL"
 assert os.environ.get("OPENAI_API_KEY"), "Set OPENAI_API_KEY before importing"
 
 _rag_settings = Settings()
 
 EMBED_MODEL = _rag_settings.EMBED_MODEL
 CHAT_MODEL = _rag_settings.CHAT_MODEL
+
+RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 
 _client = OpenAI()
@@ -241,7 +244,7 @@ def upsert_collection(coll_name: str, index_docs: list[dict] | str):
     
     if coll_name =="":
         coll_name = COLLECTION_NAME
-    print(index_docs)
+    #print(index_docs)
 
     #if isinstance(index_doc, str):
     #    index_doc = ast.literal_eval(index_doc)
@@ -388,6 +391,7 @@ def rrf_fuse(ranked_lists: list[list[dict]], k: int = 60, top_n: int = 10) -> li
                 docs[doc_id] = hit
     
     fused = sorted(scores.items(), key=lambda p: p[1], reverse=True)[:top_n]
+    ##print(f"rrf_fused\n=========\n{fused}")
     return [
         {**docs[doc_id], "rrf_score": score}
         for doc_id, score in fused
@@ -395,21 +399,27 @@ def rrf_fuse(ranked_lists: list[list[dict]], k: int = 60, top_n: int = 10) -> li
 
 
 
-async def process_goldenset_dense_search(qry, qry_vec, coll_name, k):    
-    topK_vec = await retrive_from_collection(qry_vec, coll_name, k)
-    # Parse
-    parsed_results = [
-        {
-            "chunk_id": pt.payload.get("chunk_id"),
-            "source_id": pt.payload.get("source_id"),
-            "text": pt.payload.get("text"),
-            "score": pt.score,
-        }
-        for pt in topK_vec
-    ]
-    # Generate RAG response
+_reranker = None
+def load_reranker():
+    """Lazy-load the cross-encoder. Downloads ~80MB on first use."""
+    global _reranker
+    if _reranker is None:
+        from sentence_transformers import CrossEncoder
+        _reranker = CrossEncoder(RERANKER_MODEL)
+    return _reranker
 
-##    return await ask_rag(qry_vec, parsed_results, k)
-    return {"question": qry, 
-            "retrived": parsed_results
-    }
+
+def rerank(query: str, candidates: list[dict], top_k: int = 3) -> list[dict]:
+    """Score each (query, candidate.text) pair, return top_k by score.
+    +
+    Candidates must have a 'doc' key with 'text' inside.
+    Adds a 'rerank_score' field to each returned dict.
+    """
+    reranker = load_reranker()
+    pairs = [(query, hit["text"]) for hit in candidates]
+    #print(f"Pairs: {pairs}")
+    scores = reranker.predict(pairs)
+    scored = [{**hit, "rerank_score": float(s)} for hit, s in zip(candidates, scores)]
+    scored.sort(key=lambda h: h["rerank_score"], reverse=True)
+    #print(f"Rerank\n========\n{scored}")
+    return scored[:top_k]
